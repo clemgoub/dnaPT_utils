@@ -213,7 +213,10 @@ packages <- c("ggplot2", "gridExtra", "tidyr", "reshape2")
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
 if (any(installed_packages == FALSE)) {
-  install.packages(packages[!installed_packages])
+  print(paste("ERROR: the following R packages are missing: ", packages[!installed_packages], sep = ""))
+  print("quitting...")
+  quit(status=1)
+  #install.packages(packages[!installed_packages])
 }
 # Packages loading
 invisible(lapply(packages, library, character.only = TRUE))
