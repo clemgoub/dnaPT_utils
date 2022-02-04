@@ -256,7 +256,7 @@ print(head(counts))
 print("replace NA per Unknown")
 counts\$TE_class[is.na(counts\$TE_Class)] = "Unknown"
 print("plotting...")
-ggplot(counts, aes(as.numeric(colnames(counts)[1]), as.numeric(colnames(counts)[2]), col = TE_class))+
+ggplot(counts, aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = TE_class))+
   geom_point()+
   #geom_abline(slope = 1, intercept = 0, col = "grey")+
   #geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
