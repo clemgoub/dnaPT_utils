@@ -253,6 +253,8 @@ Drep<-DD[DD\$status == "REP",]
 counts\$TE_class<-Drep\$TE_Class
 print(head(counts))
 # Plot!
+print("replace NA per Unknown")
+counts\$TE_class[is.na(counts\$TE_Class)] = "Unknown"
 print("plotting...")
 ggplot(na.omit(counts), aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
   geom_point()+
