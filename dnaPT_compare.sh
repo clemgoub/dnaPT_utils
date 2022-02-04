@@ -251,10 +251,10 @@ names(counts)<-c(data1, data2, "cluster")
 print("filter down to shared clusters...")
 Drep<-DD[DD\$status == "REP",]
 counts\$TE_class<-Drep\$TE_Class
-print(counts)
+print(head(counts))
 # Plot!
 print("plotting...")
-ggplot(counts, aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
+ggplot(na.omit(counts), aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
   geom_point()+
   geom_abline(slope = 1, intercept = 0, col = "grey")+
   geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
