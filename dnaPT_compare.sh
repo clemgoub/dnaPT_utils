@@ -225,26 +225,34 @@ invisible(lapply(packages, library, character.only = TRUE))
 # MAIN                                                                         #
 ################################################################################
 # read main table and shell variables
+print("load variables...")
 input<-paste("$OUTF", "/", "$PREFA", "_", "$PREFB", "_R.tsv", sep = "") # maybe change such as the file is a variable already?
 data1<-"$OUTF/$PREFA"
 data2<-"$OUTF/$PREFB"
 out<-"$OUTF"
+print("load table...")
 DD<-read.table(input)
 # create a column with dataset name
+print("split column...")
 DD<-separate(DD, V1, c("V1.1", "V1.2"), sep = "_comp_") 
 # rename the columns
+print("rename columns...")
 names(DD)<-c("dataset", "contig", "cluster", "length", "status", "TE_name", "TE_Class", "reads", "bp", "total_SP")
 # create a column with the percentage genome per contig per dataset
+print("compute percentages...")
 DD\$pc<-DD\$bp/DD\$total*100 
 # aggregate the count (in %) for each cluster and each dataset
+print("run dcast and convert table...")
 counts<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "pc", fun.aggregate = sum))) 
 counts\$cluster<-rownames(counts)
 counts<-counts[-1,]
 names(counts)<-c(data1, data2, "cluster")
 # create a table with only one annotation per cluster (from REPresentative sequence of CD-HIT)
+print("filter down to shared clusters...")
 Drep<-DD[DD\$status == "REP",]
 counts\$TE_class<-Drep\$TE_Class
 # Plot!
+print("plotting...")
 ggplot(counts, aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
   geom_point()+
   geom_abline(slope = 1, intercept = 0, col = "grey")+
@@ -262,7 +270,7 @@ ggplot(counts, aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())
-
+print("export plot...")
 ggsave(
   paste(data1, data2, "shared_families.pfd", sep = "_"),
   plot = last_plot(),
