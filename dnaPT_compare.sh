@@ -185,8 +185,10 @@ echo "output folder: $OUTF"
 mkdir -p $OUTF
 
 # check if clustering done
-if [ ! -f $OUTF/$PREFA''_$PREFB''.clean.clstr ] || [ -s $OUTF/$PREFA''_$PREFB''.clean.clstr ]
+if [ -s $OUTF/$PREFA''_$PREFB''.clean.clstr ]
   then
+   echo "clustering files found and not empty, skipping to R analysis..."
+  else
    cat <(sed -E 's/>/>'"$PREFA"_'/g' "$DSA"/Trinity.fasta) <(sed -E 's/>/>'"$PREFB"_'/g' "$DSB"/Trinity.fasta) > $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta
 
    # cluster sequences using CD-HIT-EST
@@ -202,7 +204,6 @@ if [ ! -f $OUTF/$PREFA''_$PREFB''.clean.clstr ] || [ -s $OUTF/$PREFA''_$PREFB''.
    # joint annotations and counts
    join -a1 -13 -21 <(sort -k3,3 $OUTF/$PREFA''_$PREFB''.clean.clstr) <(cat <(awk -v count="$AC" -v prefA="$PREFA" '{print prefA"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSA/reads_per_component_and_annotation) <(awk -v count="$BC" -v prefB="$PREFB" '{print prefB"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSB/reads_per_component_and_annotation) | sort -k1,1) | awk '{if (NF == 7) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\t"$5"\t"$6"\t"$7} else if (NF == 4) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\tNA\t0\t1"} else {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}}' | sort -k 2,2n -k1,1  > $OUTF/$PREFA''_$PREFB''_R.tsv
 fi
-
 
 Rscript - <<SCRIPT
 ################################################################################
