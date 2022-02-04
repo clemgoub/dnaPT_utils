@@ -183,11 +183,10 @@ echo "prefix B:      $PREFB"
 echo "output folder: $OUTF"
 
 mkdir -p $OUTF
-cd $OUTF
 
 # combine the contigs from each species’ dnaPipeTE run + add species name
-fileA=$(cat "$DSA"/Trinity.fasta | sed -E "s/>/>$PREFA_/g")
-fileB=$(cat "$DSB"/Trinity.fasta | sed -E "s/>/>$PREFB_/g")
+fileA=$(cat $DSA/Trinity.fasta | sed -E "s/>/>$PREFA_/g")
+fileB=$(cat $DSBTrinity.fasta | sed -E "s/>/>$PREFB_/g")
 cat $fileA $fileB > $PREFA''_$PREFB''_dnaPipeTE_contigs.fasta
 
 # cluster sequences using CD-HIT-EST
@@ -201,4 +200,4 @@ AC=$(grep 'Total' "$DSA"/Counts.txt | tail -n 1 | cut -f 2)
 BC=$(grep 'Total' "$DSB"/Counts.txt | tail -n 1 | cut -f 2)
 
 # joint annotations and counts
-join -a1 -13 -21 <(sort -k3,3 $PREFA''_$PREFB''.clean.clstr) <(cat <(awk -v count="$AC" -v prefA="$PREFA" '{print prefA"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' "$DSA"/reads_per_component_and_annotation) <(awk -v count="$BC" -v prefB="$PREFB" '{print prefB"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' "$DSB"/reads_per_component_and_annotation) | sort -k1,1) | awk '{if (NF == 7) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\t"$5"\t"$6"\t"$7} else if (NF == 4) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\tNA\t0\t1"} else {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}}' | sort -k 2,2n -k1,1  > $PREFA''_$PREFB''_R.tsv
+join -a1 -13 -21 <(sort -k3,3 $PREFA''_$PREFB''.clean.clstr) <(cat <(awk -v count="$AC" -v prefA="$PREFA" '{print prefA"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSA/reads_per_component_and_annotation) <(awk -v count="$BC" -v prefB="$PREFB" '{print prefB"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSB/reads_per_component_and_annotation) | sort -k1,1) | awk '{if (NF == 7) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\t"$5"\t"$6"\t"$7} else if (NF == 4) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\tNA\t0\t1"} else {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}}' | sort -k 2,2n -k1,1  > $PREFA''_$PREFB''_R.tsv
