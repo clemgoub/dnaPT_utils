@@ -225,7 +225,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 # MAIN                                                                         #
 ################################################################################
 # read main table and shell variables
-input<-"$OUTF/$PREFA''_$PREFB''_R.tsv" # maybe change such as the file is a variable already?
+input<-"$OUTF/$PREFA_$PREFB_R.tsv" # maybe change such as the file is a variable already?
 data1<-"$OUTF/$PREFA"
 data2<-"$OUTF/$PREFB"
 out<-"$OUTF"
