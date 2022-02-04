@@ -227,8 +227,8 @@ invisible(lapply(packages, library, character.only = TRUE))
 # read main table and shell variables
 print("load variables...")
 input<-paste("$OUTF", "/", "$PREFA", "_", "$PREFB", "_R.tsv", sep = "") # maybe change such as the file is a variable already?
-data1<-"$OUTF/$PREFA"
-data2<-"$OUTF/$PREFB"
+data1<-"$PREFA"
+data2<-"$PREFB"
 out<-"$OUTF"
 print("load table...")
 DD<-read.table(input)
