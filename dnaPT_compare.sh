@@ -235,15 +235,15 @@ DD<-separate(DD, V1, c("V1.1", "V1.2"), sep = "_comp_")
 # rename the columns
 names(DD)<-c("dataset", "contig", "cluster", "length", "status", "TE_name", "TE_Class", "reads", "bp", "total_SP")
 # create a column with the percentage genome per contig per dataset
-DD$pc<-DD$bp/DD$total*100 
+DD\$pc<-DD\$bp/DD\$total*100 
 # aggregate the count (in %) for each cluster and each dataset
 counts<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "pc", fun.aggregate = sum))) 
-counts$cluster<-rownames(counts)
+counts\$cluster<-rownames(counts)
 counts<-counts[-1,]
 names(counts)<-c(data1, data2, "cluster")
 # create a table with only one annotation per cluster (from REPresentative sequence of CD-HIT)
-Drep<-DD[DD$status == "REP",]
-counts$TE_class<-Drep$TE_Class
+Drep<-DD[DD\$status == "REP",]
+counts\$TE_class<-Drep\$TE_Class
 # Plot!
 ggplot(counts, aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
   geom_point()+
