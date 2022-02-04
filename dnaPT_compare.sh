@@ -184,20 +184,89 @@ echo "output folder: $OUTF"
 
 mkdir -p $OUTF
 
-# combine the contigs from each species’ dnaPipeTE run + add species name
-#fileA=$
-#fileB=$
-cat <(sed -E 's/>/>'"$PREFA"_'/g' "$DSA"/Trinity.fasta) <(sed -E 's/>/>'"$PREFB"_'/g' "$DSB"/Trinity.fasta) > $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta
+# check if clustering done
+if [ ! -f $OUTF/$OUTF/$PREFA''_$PREFB''.clean.clstr ] || [ -s $OUTF/$OUTF/$PREFA''_$PREFB''.clean.clstr ]
+  then
+   cat <(sed -E 's/>/>'"$PREFA"_'/g' "$DSA"/Trinity.fasta) <(sed -E 's/>/>'"$PREFB"_'/g' "$DSB"/Trinity.fasta) > $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta
 
-# cluster sequences using CD-HIT-EST
-cd-hit-est -i $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta -o $OUTF/$PREFA''_$PREFB -d 0 -aS 0.8 -c 0.8 -G 0 -g 1 -b 500 -bak 1 -T 8
+   # cluster sequences using CD-HIT-EST
+   cd-hit-est -i $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta -o $OUTF/$PREFA''_$PREFB -d 0 -aS 0.8 -c 0.8 -G 0 -g 1 -b 500 -bak 1 -T 8
 
-# clean up cd-hit outputs before joining conts for each species
-sort -k1,1n $OUTF/$PREFA''_$PREFB.bak.clstr | sed 's/>//g;s/nt,//g;s/\.\.\.//g;s/\*/REP/g;s/at//g' | awk '/REP/ {print $1"\t"$2"\t"$3"\t"$4} !/REP/ {print $1"\t"$2"\t"$3"\tin_cluster"}'> $OUTF/$PREFA''_$PREFB''.clean.clstrls
+   # clean up cd-hit outputs before joining conts for each species
+   sort -k1,1n $OUTF/$PREFA''_$PREFB.bak.clstr | sed 's/>//g;s/nt,//g;s/\.\.\.//g;s/\*/REP/g;s/at//g' | awk '/REP/ {print $1"\t"$2"\t"$3"\t"$4} !/REP/ {print $1"\t"$2"\t"$3"\tin_cluster"}'> $OUTF/$PREFA''_$PREFB''.clean.clstr
 
-# gather total bp sampled per species
-AC=$(grep 'Total' "$DSA"/Counts.txt | tail -n 1 | cut -f 2)
-BC=$(grep 'Total' "$DSB"/Counts.txt | tail -n 1 | cut -f 2)
+   # gather total bp sampled per species
+   AC=$(grep 'Total' "$DSA"/Counts.txt | tail -n 1 | cut -f 2)
+   BC=$(grep 'Total' "$DSB"/Counts.txt | tail -n 1 | cut -f 2)
 
-# joint annotations and counts
-join -a1 -13 -21 <(sort -k3,3 $OUTF/$PREFA''_$PREFB''.clean.clstr) <(cat <(awk -v count="$AC" -v prefA="$PREFA" '{print prefA"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSA/reads_per_component_and_annotation) <(awk -v count="$BC" -v prefB="$PREFB" '{print prefB"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSB/reads_per_component_and_annotation) | sort -k1,1) | awk '{if (NF == 7) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\t"$5"\t"$6"\t"$7} else if (NF == 4) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\tNA\t0\t1"} else {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}}' | sort -k 2,2n -k1,1  > $OUTF/$PREFA''_$PREFB''_R.tsv
+   # joint annotations and counts
+   join -a1 -13 -21 <(sort -k3,3 $OUTF/$PREFA''_$PREFB''.clean.clstr) <(cat <(awk -v count="$AC" -v prefA="$PREFA" '{print prefA"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSA/reads_per_component_and_annotation) <(awk -v count="$BC" -v prefB="$PREFB" '{print prefB"_"$3"\t"$5"\t"$6"\t"$1"\t"$2"\t"count}' $DSB/reads_per_component_and_annotation) | sort -k1,1) | awk '{if (NF == 7) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\t"$5"\t"$6"\t"$7} else if (NF == 4) {print $1"\t"$2"\t"$3"\t"$4"\tNA\tNA\tNA\t0\t1"} else {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}}' | sort -k 2,2n -k1,1  > $OUTF/$PREFA''_$PREFB''_R.tsv
+fi
+
+
+Rscript - <<SCRIPT
+################################################################################
+# packages loading  / install if absent                                        #
+################################################################################
+packages <- c("ggplot2", "gridExtra", "tidyr", "reshape2")
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
+# Packages loading
+invisible(lapply(packages, library, character.only = TRUE))
+
+################################################################################
+# MAIN                                                                         #
+################################################################################
+# read main table and shell variables
+input<-"$OUTF/$PREFA''_$PREFB''_R.tsv" # maybe change such as the file is a variable already?
+data1<-"$OUTF/$PREFA"
+data2<-"$OUTF/$PREFB"
+out<-"$OUTF"
+DD<-read.table(input)
+# create a column with dataset name
+DD<-separate(DD, V1, c("V1.1", "V1.2"), sep = "_comp_") 
+# rename the columns
+names(DD)<-c("dataset", "contig", "cluster", "length", "status", "TE_name", "TE_Class", "reads", "bp", "total_SP")
+# create a column with the percentage genome per contig per dataset
+DD$pc<-DD$bp/DD$total*100 
+# aggregate the count (in %) for each cluster and each dataset
+counts<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "pc", fun.aggregate = sum))) 
+counts$cluster<-rownames(counts)
+counts<-counts[-1,]
+names(counts)<-c(data1, data2, "cluster")
+# create a table with only one annotation per cluster (from REPresentative sequence of CD-HIT)
+Drep<-DD[DD$status == "REP",]
+counts$TE_class<-Drep$TE_Class
+# Plot!
+ggplot(counts, aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
+  geom_point()+
+  geom_abline(slope = 1, intercept = 0, col = "grey")+
+  geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
+  geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
+  geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
+  geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
+  scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+  scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+  xlab(paste(data1, " (%)", sep = ""))+
+  ylab(paste(data2, " (%)", sep = ""))+
+  annotation_logticks()+
+  theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+ggsave(
+  paste(data1, data2, "shared_families.pfd", sep = "_"),
+  plot = last_plot(),
+  device = "pdf",
+  path = out,
+  scale = 1,
+  width = 1000,
+  height = 1000,
+  units = "px",
+)
+SCRIPT
