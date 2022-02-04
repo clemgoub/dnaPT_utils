@@ -185,7 +185,7 @@ echo "output folder: $OUTF"
 mkdir -p $OUTF
 
 # check if clustering done
-if [ ! -f $OUTF/$OUTF/$PREFA''_$PREFB''.clean.clstr ] || [ -s $OUTF/$OUTF/$PREFA''_$PREFB''.clean.clstr ]
+if [ ! -f $OUTF/$PREFA''_$PREFB''.clean.clstr ] || [ -s $OUTF/$PREFA''_$PREFB''.clean.clstr ]
   then
    cat <(sed -E 's/>/>'"$PREFA"_'/g' "$DSA"/Trinity.fasta) <(sed -E 's/>/>'"$PREFB"_'/g' "$DSB"/Trinity.fasta) > $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta
 
