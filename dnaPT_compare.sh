@@ -256,6 +256,7 @@ print(head(counts))
 print("replace NA per Unknown")
 counts\$TE_class[is.na(counts\$TE_Class)] = "Unknown"
 print("plotting...")
+print(
 ggplot(na.omit(counts), aes(as.numeric(data1), as.numeric(data2), col = TE_class))+
   geom_point()+
   geom_abline(slope = 1, intercept = 0, col = "grey")+
@@ -273,6 +274,7 @@ ggplot(na.omit(counts), aes(as.numeric(data1), as.numeric(data2), col = TE_class
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())
+        )
 print("export plot...")
 ggsave(
   paste(data1, data2, "shared_families.pfd", sep = "_"),
