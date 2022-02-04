@@ -186,8 +186,8 @@ mkdir -p $OUTF
 cd $OUTF
 
 # combine the contigs from each species’ dnaPipeTE run + add species name
-fileA=$(sed -E "s/>/>$PREFA_/g" "$DSA/Trinity.fasta")
-fileB=$(sed -E "s/>/>$PREFB_/g" "$DSB/Trinity.fasta")
+fileA=$(cat "$DSA/Trinity.fasta" | sed -E "s/>/>$PREFA_/g")
+fileB=$(cat "$DSB/Trinity.fasta" | sed -E "s/>/>$PREFB_/g")
 cat $fileA $fileB > $PREFA''_$PREFB''_dnaPipeTE_contigs.fasta
 
 # cluster sequences using CD-HIT-EST
