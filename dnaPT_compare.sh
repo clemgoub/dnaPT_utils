@@ -349,15 +349,15 @@ ggsave(
 print("filtering ecp counts...")
 counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
 print("plotting ecp...")
-plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(paste(data1, "_ecp", sep = ""))), as.numeric(!!ensym(paste(data2, "_ecp", sep = ""))), col = Class))+
+plot<-ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
         geom_point()+
         geom_abline(slope = 1, intercept = 0, col = "grey")+
         geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
         geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
         geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
         geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
-        scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-        scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
         xlab(paste(data1, " (equivalent copy)", sep = ""))+
         ylab(paste(data2, " (equivalent copy)", sep = ""))+
         annotation_logticks()+
