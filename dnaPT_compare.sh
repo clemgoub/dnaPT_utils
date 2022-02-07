@@ -15,24 +15,44 @@ function usage()
 
    **************************************
 
-   This script search and measure the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE             
+   This script search and measure the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE. 
+   1/ Shared families are identified by clustering together the repeat sequences ("Trinity.fasta") of each dataset. The clus
+   -tering is performed with cd-hit-est with the parameters described in Goubert et al, 2021 (Mobile DNA, in press) and appr
+   -oximate the "80-80-80" rule. 
+   2/ Shared families are identified by selecting clusters were sequences from both dataset A and B are present. For each cl
+   -uster, the counts (in bp) and genome % are summed per dataset to obain a quantification of each shared family. The class
+   -ification of a shared repeat is taken from the representative sequence of each cluster, and correspond to the longest se
+   -quence in the cluster. It can either come from dataset A or B. 
+   3/ The abundances of each shared family, either in % genome or equivalent copy, are then plotted with R/ggplot2.
+   
+   It is recommended to use caution while interpreting results with low quantities, typically < 0.01% or < 1 equivalent copy
+   Thresholds options are available (-p / -e) to filter the plotted data.
    
    Dependencies:
+
    - CD-HIT
-   - R                                      
+   - R + packages "ggplot2", "scales", "tidyr", "reshape2"         
+
    ***************************************
 
    Usage: ./dnaPT_compare.sh -A <dataset_A_directory> -a <prefix_A> -B <dataset_B_directory> -b <prefix_B> -o <output_folder>
 
    mendatory arguments:
-    
     -A, --dir_A                  dnaPipeTE output directory for dataset A (path)
     -B, --dir_B                  dnaPipeTE output directory for dataset B (path)
     -a, --pref_a                 prefix for dataset A (string)
     -b, --pref_b                 prefix for dataset B (string)
     -o, --output                 output folder (path)
+
+   options:
+    -T, --te_only                Only plot repeats of the classes "LINE", "SINE", "LTR", "DNA" and "Unknown"
+    -S, --subclass               Plot with subclass information (instead of Class)
     -p, --percent_threshold      min. percent genome to plot (default = 0) / not used if -E/-ecp selected
     -E, --ecp                    perform comparison in equivalent copy (dataset counts in bp / representative sequence size)
+                                 Caution: the length used for normalization is based on the length of the representative seq
+                                 -quence of each cluster, which originate from either one of the two dataset compared. It is
+                                 thus assumed that the consensus length is the same in each species/sample, which is not nec
+                                 -essarily true. 
     -e, --ecp_threshold          min. equivalent copy/ies to plot (default = 0)
 
 HEREDOC
@@ -143,18 +163,18 @@ while (( "$#" )); do
 #      fi
 #       ;;
 # boolean flags            
-     # -P | --percent)
-     #     PERC=TRUE
-     #     shift
-     #   ;; 
+      -T | --te_only)
+          TE=TRUE
+          shift
+        ;; 
      -E | --ecp)
          ECP=TRUE
          shift
         ;;
-#     -D | --emboss-dotmatcher)
-#         DOTMA=TRUE
-#         shift
-#        ;;         
+     -S | --subclass)
+         SUB=TRUE
+         shift
+        ;;         
     -*|--*=) # unsupported flags
       echo "Error: Unsupported argument $1" >&2
       usage
@@ -181,6 +201,8 @@ OUTF="${OUTF:-compa}"
 ECP="${ECP:-FALSE}"
 TPERC="${TPERC:-0}"
 TECP="${TECP:-0}"
+TE="${TE:-FALSE}"
+SUB="${SUB:-FALSE}"
 
 # param check
 echo "dataset A:          $DSA"
@@ -192,6 +214,8 @@ echo "output folder:      $OUTF"
 echo "ecp:                $ECP"
 echo "percent threshold:  $TPERC"
 echo "ecp threshold:      $TECP"
+echo "TE only:            $TE"
+echo "Subclass level:     $SUB"
 
 # check exclusive parameters
 # if [ ${PERC} == TRUE ] && [ ${ECP} == TRUE ]; then
@@ -253,6 +277,8 @@ out<-"$OUTF"
 ecp_status<-"$ECP"
 pc_T<-as.numeric("$TPERC")
 ecp_T<-as.numeric("$TECP")
+te_choice<-"$TE"
+subc<-"$SUB"
 
 print("load table...")
 DD<-read.table(input)
@@ -307,79 +333,135 @@ names(ecps)<-c("ecp_1", "ecp_2")
 print("binds to main table...")
 counts<-cbind(counts, ecps)
 
-
 print("exporting table...")
 write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 
 # Plot!
 
-if(ecp_status == FALSE){
-print("filtering percent counts...")
-counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
-print("plotting percent...")
-plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
-        geom_point()+
-        geom_abline(slope = 1, intercept = 0, col = "grey")+
-        geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
-        geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
-        geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
-        geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
-        scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-        scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-        xlab(paste(data1, " (%)", sep = ""))+
-        ylab(paste(data2, " (%)", sep = ""))+
-        annotation_logticks()+
-        theme(axis.line = element_line(colour = "black"),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_blank())
-print("export pc plot...")
-ggsave(
-  paste(data1, data2, "shared_families_percent.pdf", sep = "_"),
-  plot = plot,
-  device = "pdf",
-  path = out,
-  scale = 1,
-  width = 2600,
-  height = 2000,
-  units = "px"
-)
-} else {
-print("filtering ecp counts...")
-#counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
-counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
-print("plotting ecp...")
-#ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
-plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
-        geom_point()+
-        geom_abline(slope = 1, intercept = 0, col = "grey")+
-        geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
-        geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
-        geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
-        geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
-        scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
-        scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
-        xlab(paste(data1, " (equivalent copy)", sep = ""))+
-        ylab(paste(data2, " (equivalent copy)", sep = ""))+
-        annotation_logticks()+
-        theme(axis.line = element_line(colour = "black"),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_blank())
-print("export ecp plot...")
-ggsave(
- paste(data1, data2, "shared_families_ecp.pdf", sep = "_"),
- plot = plot,
- device = "pdf",
- path = out,
- scale = 1,
- width = 2600,
- height = 2000,
- units = "px"
-)
+if(te_choice == TRUE){
+   print("filtering only TE")
+   counts<-counts[grep("LTR|LINE|DNA|RC|Unknown", counts\$Class),]
 }
 
+if(subc == TRUE){
+
+   if(ecp_status == FALSE){
+   print("filtering percent counts...")
+   counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
+   print("plotting percent...")
+   plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Super_family))+
+           geom_point()+
+           scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           xlab(paste(data1, " (%)", sep = ""))+
+           ylab(paste(data2, " (%)", sep = ""))+
+           annotation_logticks()+
+           theme(axis.line = element_line(colour = "black"),
+                 panel.grid.major = element_blank(),
+                 panel.grid.minor = element_blank(),
+                 panel.border = element_blank(),
+                 panel.background = element_blank())
+   print("export pc plot...")
+   ggsave(
+     paste(data1, data2, "shared_families_percent.pdf", sep = "_"),
+     plot = plot,
+     device = "pdf",
+     path = out,
+     scale = 1,
+     width = 2600,
+     height = 2000,
+     units = "px"
+   )
+   } else {
+   print("filtering ecp counts...")
+   #counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
+   counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
+   print("plotting ecp...")
+   #ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Super_family))+
+   plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Super_family))+
+           geom_point()+
+           scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
+           scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
+           xlab(paste(data1, " (equivalent copy)", sep = ""))+
+           ylab(paste(data2, " (equivalent copy)", sep = ""))+
+           annotation_logticks()+
+           theme(axis.line = element_line(colour = "black"),
+                 panel.grid.major = element_blank(),
+                 panel.grid.minor = element_blank(),
+                 panel.border = element_blank(),
+                 panel.background = element_blank())
+   print("export ecp plot...")
+   ggsave(
+    paste(data1, data2, "shared_families_ecp.pdf", sep = "_"),
+    plot = plot,
+    device = "pdf",
+    path = out,
+    scale = 1,
+    width = 2600,
+    height = 2000,
+    units = "px"
+   )
+   }
+
+   } else {
+
+   if(ecp_status == FALSE){
+   print("filtering percent counts...")
+   counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
+   print("plotting percent...")
+   plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
+           geom_point()+
+           scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           xlab(paste(data1, " (%)", sep = ""))+
+           ylab(paste(data2, " (%)", sep = ""))+
+           annotation_logticks()+
+           theme(axis.line = element_line(colour = "black"),
+                 panel.grid.major = element_blank(),
+                 panel.grid.minor = element_blank(),
+                 panel.border = element_blank(),
+                 panel.background = element_blank())
+   print("export pc plot...")
+   ggsave(
+     paste(data1, data2, "shared_families_percent.pdf", sep = "_"),
+     plot = plot,
+     device = "pdf",
+     path = out,
+     scale = 1,
+     width = 2600,
+     height = 2000,
+     units = "px"
+   )
+   } else {
+   print("filtering ecp counts...")
+   #counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
+   counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
+   print("plotting ecp...")
+   #ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
+   plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
+           geom_point()+
+           scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
+           scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
+           xlab(paste(data1, " (equivalent copy)", sep = ""))+
+           ylab(paste(data2, " (equivalent copy)", sep = ""))+
+           annotation_logticks()+
+           theme(axis.line = element_line(colour = "black"),
+                 panel.grid.major = element_blank(),
+                 panel.grid.minor = element_blank(),
+                 panel.border = element_blank(),
+                 panel.background = element_blank())
+   print("export ecp plot...")
+   ggsave(
+    paste(data1, data2, "shared_families_ecp.pdf", sep = "_"),
+    plot = plot,
+    device = "pdf",
+    path = out,
+    scale = 1,
+    width = 2600,
+    height = 2000,
+    units = "px"
+   )
+   }
+}
 SCRIPT
