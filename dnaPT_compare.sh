@@ -302,7 +302,8 @@ ecps<-as.data.frame(cbind(as.numeric(counts[,6])/counts\$REPlen, as.numeric(coun
 print("rename ecp cols...")
 print(ecps[1:10,])
 print(c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = "")))
-names(ecps)<-c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = ""))
+#names(ecps)<-c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = ""))
+names(ecps)<-c("ecp_1", "ecp_2")
 print("binds to main table...")
 counts<-cbind(counts, ecps)
 
@@ -347,9 +348,11 @@ ggsave(
 )
 } else {
 print("filtering ecp counts...")
-counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
+#counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
+counts_t<-counts[counts\$ecp_1] >= ecp_T & counts\$ecp_2 >= ecp_T,]
 print("plotting ecp...")
-plot<-ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
+#ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
+plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
         geom_point()+
         geom_abline(slope = 1, intercept = 0, col = "grey")+
         geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
