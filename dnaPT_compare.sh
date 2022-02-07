@@ -272,6 +272,7 @@ print("consolidate SF column...")
 counts\$Super_family<-paste(counts\$Class, counts\$Super_family, sep = "/")
 print("renames NA in SF columns...")
 counts\$Super_family[counts\$Super_family == "Unknown/NA"]<-"Unknown"
+print(counts[1:20,])
 print("compute ecp...")
 counts\$paste(data1, "_ecp", sep = "")<-as.numeric(counts\$paste(data1, "_bp", sep = ""))/counts\$REPlen
 counts\$paste(data2, "_ecp", sep = "")<-as.numeric(counts\$paste(data2, "_bp", sep = ""))/counts\$REPlen
