@@ -31,6 +31,9 @@ function usage()
     -a, --pref_a                 prefix for dataset A (string)
     -b, --pref_b                 prefix for dataset B (string)
     -o, --output                 output folder (path)
+    -p, --percent_threshold      min. percent genome to plot (default = 0) / not used if -E/-ecp selected
+    -E, --ecp                    perform comparison in equivalent copy (dataset counts in bp / representative sequence size)
+    -e, --ecp_threshold          min. equivalent copy/ies to plot (default = 0)
 
 HEREDOC
 } 
@@ -99,18 +102,18 @@ while (( "$#" )); do
         exit 1
       fi
       ;;
-#    -f|--full-length-threshold)
-#       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-#         FL=$2
-#         shift 2
-#       fi
-#       ;;
-#     -a|--alpha)
-#       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-#         ALPHA=$2
-#         shift 2
-#       fi
-#       ;;
+    -p|--percent_threshold)
+       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+         TPERC=$2
+         shift 2
+       fi
+       ;;
+     -e|--ecp_threshold)
+       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+         TECP=$2
+         shift 2
+       fi
+       ;;
 #     -F | --full-length-alpha)
 #       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
 #         FULL_ALPHA=$2
@@ -139,15 +142,15 @@ while (( "$#" )); do
 #        shift 2  
 #      fi
 #       ;;
-# # boolean flags            
-#     -t | --tables)
-#         TABLES=TRUE
-#         shift
-#       ;; 
-#     -T | --all-Tables)
-#         ALLTAB=TRUE
-#         shift
-#        ;;
+# boolean flags            
+     # -P | --percent)
+     #     PERC=TRUE
+     #     shift
+     #   ;; 
+     -E | --ecp)
+         ECP=TRUE
+         shift
+        ;;
 #     -D | --emboss-dotmatcher)
 #         DOTMA=TRUE
 #         shift
@@ -174,13 +177,30 @@ eval set -- "$PARAMS"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 # asign default value and print parameters
 OUTF="${OUTF:-compa}"
+#PERC="${PERC:-TRUE}"
+ECP="${ECP:-FALSE}"
+TPERC="${TPERC:-0}"
+TECP="${TECP:-0}"
 
 # param check
-echo "dataset A:     $DSA"
-echo "dataset B:     $DSB"
-echo "prefix A:      $PREFA"
-echo "prefix B:      $PREFB"
-echo "output folder: $OUTF"
+echo "dataset A:          $DSA"
+echo "dataset B:          $DSB"
+echo "prefix A:           $PREFA"
+echo "prefix B:           $PREFB"
+echo "output folder:      $OUTF"
+#echo "percent:            $PERC"
+echo "ecp:                $ECP"
+echo "percent threshold:  $TPERC"
+echo "ecp threshold:      $TECP"
+
+# check exclusive parameters
+# if [ ${PERC} == TRUE ] && [ ${ECP} == TRUE ]; then
+#   echo "ERROR: requires only one of -P (percent) or -E (equivalent copy)"
+#   usage
+#   exit 1
+# fi
+
+############ START ############
 
 mkdir -p $OUTF
 
@@ -207,7 +227,7 @@ fi
 
 Rscript - <<SCRIPT
 ################################################################################
-# packages loading  / install if absent                                        #
+# packages loading  / error if absent                                          #
 ################################################################################
 packages <- c("ggplot2", "gridExtra", "tidyr", "reshape2")
 # Install packages not yet installed
@@ -230,6 +250,10 @@ input<-paste("$OUTF", "/", "$PREFA", "_", "$PREFB", "_R.tsv", sep = "") # maybe 
 data1<-"$PREFA"
 data2<-"$PREFB"
 out<-"$OUTF"
+ecp_status<-"$ECP"
+pc_T<-as.numeric("$TPERC")
+ecp_T<-as.numeric("$TECP")
+
 print("load table...")
 DD<-read.table(input)
 # create a column with dataset name
@@ -284,39 +308,64 @@ counts<-cbind(counts, ecps)
 
 
 print("exporting table...")
-write.table(counts, file="$OUTF/comparison_table.txt")
+write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 
 # Plot!
-#print("replace NA per Unknown")
-#counts\$TE_class[is.na(counts\$TE_Class)] = "Unknown"
-print("plotting...")
-ggplot(na.omit(counts), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = TE_class))+
-  geom_point()+
-  geom_abline(slope = 1, intercept = 0, col = "grey")+
-  geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
-  geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
-  geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
-  geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
-  scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-  scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-  xlab(paste(data1, " (%)", sep = ""))+
-  ylab(paste(data2, " (%)", sep = ""))+
-  annotation_logticks()+
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank())
+
+if(ecp_status == FALSE){
+print("filtering percent counts...")
+counts_t<-as.data.fame(counts[counts[,1] >= pc_T && counts[,2] >= pc_T,])
+print("plotting percent...")
+plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
+        geom_point()+
+        geom_abline(slope = 1, intercept = 0, col = "grey")+
+        geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
+        geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
+        geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
+        geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
+        scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        xlab(paste(data1, " (%)", sep = ""))+
+        ylab(paste(data2, " (%)", sep = ""))+
+        annotation_logticks()+
+        theme(axis.line = element_line(colour = "black"),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank())
+} else {
+print("filtering ecp counts...")
+counts_t<-as.data.fame(counts[counts[,11] >= ecp_T && counts[,12] >= ecp_T,])
+print("plotting ecp...")
+plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(paste(data1, "_ecp", sep = ""))), as.numeric(!!ensym(paste(data2, "_ecp", sep = ""))), col = Class))+
+        geom_point()+
+        geom_abline(slope = 1, intercept = 0, col = "grey")+
+        geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
+        geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
+        geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
+        geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
+        scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        xlab(paste(data1, " (equivalent copy)", sep = ""))+
+        ylab(paste(data2, " (equivalent copy)", sep = ""))+
+        annotation_logticks()+
+        theme(axis.line = element_line(colour = "black"),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank())
+}
+
 
 print("export plot...")
 ggsave(
-  paste(data1, data2, "shared_families.pfd", sep = "_"),
-  plot = last_plot(),
+  paste(data1, data2, "shared_families.pdf", sep = "_"),
+  plot = plot,
   device = "pdf",
   path = out,
   scale = 1,
-  width = 1000,
+  width = 1300,
   height = 1000,
   units = "px",
 )
