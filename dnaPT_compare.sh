@@ -274,7 +274,7 @@ print("renames NA in SF columns...")
 counts\$Super_family[counts\$Super_family == "Unknown/NA"]<-"Unknown"
 print(counts[1:20,])
 print("compute ecp...")
-ecps<-cbind(as.numeric(counts[,6]])/counts\$REPlen, as.numeric(counts[,7]])/counts\$REPlen)
+ecps<-cbind(as.numeric(counts[,6])/counts\$REPlen, as.numeric(counts[,7])/counts\$REPlen)
 print("rename ecp cols...")
 names(ecps)<-c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = ""))
 print("binds to main table...")
