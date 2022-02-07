@@ -347,7 +347,7 @@ ggsave(
 )
 } else {
 print("filtering ecp counts...")
-counts_t<-as.data.frame(counts[counts[,11] >= ecp_T & counts[,12] >= ecp_T,])
+counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
 print("plotting ecp...")
 plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(paste(data1, "_ecp", sep = ""))), as.numeric(!!ensym(paste(data2, "_ecp", sep = ""))), col = Class))+
         geom_point()+
