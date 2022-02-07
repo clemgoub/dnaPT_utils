@@ -251,12 +251,31 @@ names(counts)<-c(data1, data2, "cluster")
 print("filter down to shared clusters...")
 Drep<-DD[DD\$status == "REP",]
 counts\$TE_class<-Drep\$TE_Class
-print(head(counts))
+#print(head(counts))
+
+print("new additions...")
+bp<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "bp", fun.aggregate = sum)))
+bp<-bp[-1,]
+names(bp)<-c(paste(data1, "_bp", sep = ""), paste(data2, "_bp", sep = ""))
+counts<-cbind(counts, bp)
+counts\$REPlen<-Drep\$length
+counts\$REPname<-paste(Drep\$dataset, Drep\$contig, sep = "_")
+counts<-separate(counts, TE_class, c("Class", "Super_family"), sep = "/",fill = "right") 
+counts\$Class[is.na(counts\$Class)]<-"Unknown"
+counts\$Super_family<-paste(counts\$Class, counts\$Super_family, sep = "/")
+counts\$Super_family[counts\$Super_family == "Unknown/NA"]<-"Unknown"
+counts\$paste(data1, "_ecp", sep = "")<-as.numeric(counts\$paste(data1, "_bp", sep = ""))/counts\$REPlen
+counts\$paste(data2, "_ecp", sep = "")<-as.numeric(counts\$paste(data2, "_bp", sep = ""))/counts\$REPlen
+
+print("exporting table...")
+write.table(counts, file="$OUTF/comparison_table.txt")
+
+
 # Plot!
-print("replace NA per Unknown")
-counts\$TE_class[is.na(counts\$TE_Class)] = "Unknown"
+#print("replace NA per Unknown")
+#counts\$TE_class[is.na(counts\$TE_Class)] = "Unknown"
 print("plotting...")
-ggplot(counts, aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = TE_class))+
+ggplot(na.omit(counts), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = TE_class))+
   geom_point()+
   geom_abline(slope = 1, intercept = 0, col = "grey")+
   geom_abline(slope = 10, intercept = 0, col = "red", lty = 3)+
