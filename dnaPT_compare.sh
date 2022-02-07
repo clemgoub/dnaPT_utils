@@ -356,11 +356,11 @@ plot<-ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), 
         geom_abline(slope = 0.1, intercept = 0, col = "red", lty = 3)+
         geom_abline(slope = 2, intercept = 0, col = "gold", lty = 2)+
         geom_abline(slope = 0.5, intercept = , col = "gold", lty = 2)+
-        scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-        scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        #scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+        #scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
         xlab(paste(data1, " (equivalent copy)", sep = ""))+
         ylab(paste(data2, " (equivalent copy)", sep = ""))+
-        annotation_logticks()+
+        #annotation_logticks()+
         theme(axis.line = element_line(colour = "black"),
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
