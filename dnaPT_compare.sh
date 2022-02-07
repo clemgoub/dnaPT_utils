@@ -315,7 +315,7 @@ write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 if(ecp_status == FALSE){
 print("filtering percent counts...")
-counts_t<-as.data.frame(counts[counts[,1] >= pc_T && counts[,2] >= pc_T,])
+counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
 print("plotting percent...")
 plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
         geom_point()+
@@ -336,7 +336,7 @@ plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ens
               panel.background = element_blank())
 } else {
 print("filtering ecp counts...")
-counts_t<-as.data.frame(counts[counts[,11] >= ecp_T && counts[,12] >= ecp_T,])
+counts_t<-as.data.frame(counts[counts[,11] >= ecp_T & counts[,12] >= ecp_T,])
 print("plotting ecp...")
 plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(paste(data1, "_ecp", sep = ""))), as.numeric(!!ensym(paste(data2, "_ecp", sep = ""))), col = Class))+
         geom_point()+
