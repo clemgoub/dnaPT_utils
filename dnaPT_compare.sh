@@ -334,6 +334,17 @@ plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ens
               panel.grid.minor = element_blank(),
               panel.border = element_blank(),
               panel.background = element_blank())
+print("export pc plot...")
+ggsave(
+  paste(data1, data2, "shared_families_percent.pdf", sep = "_"),
+  plot = plot,
+  device = "pdf",
+  path = out,
+  scale = 1,
+  width = 2600,
+  height = 2000,
+  units = "px",
+)
 } else {
 print("filtering ecp counts...")
 counts_t<-as.data.frame(counts[counts[,11] >= ecp_T & counts[,12] >= ecp_T,])
@@ -355,18 +366,16 @@ plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(paste(data1, "_ecp", sep 
               panel.grid.minor = element_blank(),
               panel.border = element_blank(),
               panel.background = element_blank())
+print("export ecp plot...")
+ggsave(
+ paste(data1, data2, "shared_families_ecp.pdf", sep = "_"),
+ plot = plot,
+ device = "pdf",
+ path = out,
+ scale = 1,
+ width = 2600,
+ height = 2000,
+ units = "px",
 }
 
-
-print("export plot...")
-ggsave(
-  paste(data1, data2, "shared_families.pdf", sep = "_"),
-  plot = plot,
-  device = "pdf",
-  path = out,
-  scale = 1,
-  width = 1300,
-  height = 1000,
-  units = "px",
-)
 SCRIPT
