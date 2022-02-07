@@ -254,16 +254,25 @@ counts\$TE_class<-Drep\$TE_Class
 #print(head(counts))
 
 print("new additions...")
+print("dcast bp...")
 bp<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "bp", fun.aggregate = sum)))
 bp<-bp[-1,]
+print("rename column with paste function...")
 names(bp)<-c(paste(data1, "_bp", sep = ""), paste(data2, "_bp", sep = ""))
+print("cbind tables...")
 counts<-cbind(counts, bp)
 counts\$REPlen<-Drep\$length
+print("get rep name...")
 counts\$REPname<-paste(Drep\$dataset, Drep\$contig, sep = "_")
+print("split class...")
 counts<-separate(counts, TE_class, c("Class", "Super_family"), sep = "/",fill = "right") 
+print("rename Unknowns...")
 counts\$Class[is.na(counts\$Class)]<-"Unknown"
+print("consolidate SF column...")
 counts\$Super_family<-paste(counts\$Class, counts\$Super_family, sep = "/")
+print("renames NA in SF columns...")
 counts\$Super_family[counts\$Super_family == "Unknown/NA"]<-"Unknown"
+print("compute ecp...")
 counts\$paste(data1, "_ecp", sep = "")<-as.numeric(counts\$paste(data1, "_bp", sep = ""))/counts\$REPlen
 counts\$paste(data2, "_ecp", sep = "")<-as.numeric(counts\$paste(data2, "_bp", sep = ""))/counts\$REPlen
 
