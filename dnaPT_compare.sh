@@ -343,7 +343,7 @@ ggsave(
   scale = 1,
   width = 2600,
   height = 2000,
-  units = "px",
+  units = "px"
 )
 } else {
 print("filtering ecp counts...")
@@ -375,7 +375,8 @@ ggsave(
  scale = 1,
  width = 2600,
  height = 2000,
- units = "px",
+ units = "px"
+)
 }
 
 SCRIPT
