@@ -182,7 +182,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 # asign default value and print parameters
 OUTF="${OUTF:-$DSA}"
 SUB="${SUB:-FALSE}"
-PREF="${SUB:-dnaPipeTE}"
+PREF="${PREF:-dnaPipeTE}"
 # param check
 echo "input dataset:      $DSA"
 echo "output folder:      $OUTF"
