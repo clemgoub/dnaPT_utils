@@ -21,10 +21,10 @@ function usage()
 
    This script perform at "TE landscape" analysis, i.e., it plots an histogram of the blastn divergence between raw reads (TE
    copies in the genomes) and their consensus sequences assembled in "Trinity.fasta". The script plots only putative TE seque
-   -nce among "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown" (a.k.a. "NA"). 
+   -nce among the subclasses "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown" (a.k.a. "NA"). 
 
    Dependencies:
-   - R + package "ggplot2" (https://www.r-bloggers.com/2010/11/installing-r-packages/)
+   - R + package "ggplot2" and "tidyr" (https://www.r-bloggers.com/2010/11/installing-r-packages/)
 
    ***************************************
 
@@ -36,7 +36,7 @@ function usage()
    options:
     -p, --prefix                 prefix to append to the output filename: "<prefix>_landscapes.pdf"
     -o, --output                 output folder (path); default: dnaPipeTE output directory
-    -S, --superfamily            Plot with super-family information (instead of sub-class)
+    -S, --superfamily            Plot with superfamily information (instead of subclass)
     -h, --help                   Prints this message and exit
 
 HEREDOC
@@ -197,7 +197,7 @@ Rscript - <<SCRIPT
 ################################################################################
 # packages loading  / error if absent                                          #
 ################################################################################
-packages <- c("ggplot2")
+packages <- c("ggplot2", "tidyr")
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
 if (any(installed_packages == FALSE)) {
