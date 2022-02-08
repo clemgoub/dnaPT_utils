@@ -15,14 +15,17 @@ function usage()
 
    **************************************
 
-   This script search and measure the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE. 
+   This script measures the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE. 
+   
    1/ Shared families are identified by clustering together the repeat sequences ("Trinity.fasta") of each dataset. The clus
    -tering is performed with cd-hit-est with the parameters described in Goubert et al, 2021 (Mobile DNA, in press) and appr
    -oximate the "80-80-80" rule. 
+   
    2/ Shared families are identified by selecting clusters were sequences from both dataset A and B are present. For each cl
    -uster, the counts (in bp) and genome % are summed per dataset to obain a quantification of each shared family. The class
    -ification of a shared repeat is taken from the representative sequence of each cluster, and correspond to the longest se
    -quence in the cluster. It can either come from dataset A or B. 
+   
    3/ The abundances of each shared family, either in % genome or equivalent copy, are then plotted with R/ggplot2.
    
    It is recommended to use caution while interpreting results with low quantities, typically < 0.01% or < 1 equivalent copy
@@ -54,6 +57,8 @@ function usage()
                                  thus assumed that the consensus length is the same in each species/sample, which is not nec
                                  -essarily true. 
     -e, --ecp_threshold          min. equivalent copy/ies to plot (default = 0)
+
+    -h, --help                   Prints this message and exit
 
 HEREDOC
 } 
@@ -152,10 +157,10 @@ while (( "$#" )); do
 #         shift 2
 #       fi
 #       ;; 
-#     -h | --help)
-#        usage
-#        exit 1
-#        ;;
+     -h | --help)
+        usage
+        exit 1
+        ;;
 #    -o | --output)
 #      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
 #        OUTPUT=$2
@@ -253,7 +258,7 @@ Rscript - <<SCRIPT
 ################################################################################
 # packages loading  / error if absent                                          #
 ################################################################################
-packages <- c("ggplot2", "gridExtra", "tidyr", "reshape2")
+packages <- c("ggplot2", "tidyr", "reshape2", "scales")
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
 if (any(installed_packages == FALSE)) {
@@ -352,8 +357,9 @@ if(subc == TRUE){
    print("plotting percent...")
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Super_family))+
            geom_point()+
-           scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-           scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           geom_abline(slope = 1, intercept = 0, col = "grey")+
+           scale_y_continuous(trans='log10', labels = comma)+ #  breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           scale_x_continuous(trans='log10', labels = comma)+ # breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
            xlab(paste(data1, " (%)", sep = ""))+
            ylab(paste(data2, " (%)", sep = ""))+
            annotation_logticks()+
@@ -381,6 +387,7 @@ if(subc == TRUE){
    #ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Super_family))+
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Super_family))+
            geom_point()+
+           geom_abline(slope = 1, intercept = 0, col = "grey")+
            scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            xlab(paste(data1, " (equivalent copy)", sep = ""))+
@@ -412,8 +419,9 @@ if(subc == TRUE){
    print("plotting percent...")
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
            geom_point()+
-           scale_y_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
-           scale_x_continuous(trans='log10', breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
+           geom_abline(slope = 1, intercept = 0, col = "grey")+
+           scale_y_continuous(trans='log10', labels = comma)+
+           scale_x_continuous(trans='log10', labels = comma)+
            xlab(paste(data1, " (%)", sep = ""))+
            ylab(paste(data2, " (%)", sep = ""))+
            annotation_logticks()+
@@ -441,6 +449,7 @@ if(subc == TRUE){
    #ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
            geom_point()+
+           geom_abline(slope = 1, intercept = 0, col = "grey")+
            scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            xlab(paste(data1, " (equivalent copy)", sep = ""))+
