@@ -232,10 +232,10 @@ lscapes<-ggplot(land, aes(100-V1, fill = V4))+
 
 # export
 ggsave(
-    file = "$DSA/landscapes.pdf",
+    file = "landscapes.pdf",
     plot = plot,
     device = "pdf",
-    path = out,
+    path = "$OUTF",
     scale = 1,
     width = 2600,
     height = 2000,
