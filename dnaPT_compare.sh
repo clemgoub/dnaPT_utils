@@ -354,14 +354,15 @@ if(te_choice == TRUE){
 
 # find corresponding colors
 print("picking colors...")
-cols<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
+colors<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
+print(head(colors))
 cols<-rep("", length((levels(as.factor(counts\$Class)))))
 if(subc == FALSE){
 for(i in 1:length(levels(as.factor(counts\$Class)))){
-  cols[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Class))[i], "\$", sep = ""), x = cols\$V1)]}
+  cols[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Class))[i], "\$", sep = ""), x = colors\$V1)]}
 } else {
    for(i in 1:length(levels(as.factor(counts\$Super_family)))){
-  cols[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Super_family))[i], "\$", sep = ""), x = cols\$V1)]}
+  cols[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Super_family))[i], "\$", sep = ""), x = colors\$V1)]}
 }
 
 
