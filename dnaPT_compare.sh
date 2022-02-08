@@ -344,10 +344,25 @@ write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 # Plot!
 
+
+# filter only TE if asked
 if(te_choice == TRUE){
    print("filtering only TE")
-   counts<-counts[grep("LTR|LINE|DNA|RC|Unknown", counts\$Class),]
+   counts<-counts[grep("LTR|LINE|SINE|DNA|RC|Unknown", counts\$Class),]
+   }
+
+# find corresponding colors
+cols<-read.table("$DIR/colors.land", sep = "\t")
+cols<-rep("", length((levels(as.factor(counts\$Class)))))
+if(subc == FALSE){
+for(i in 1:length(levels(as.factor(counts\$Class)))){
+  cols[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Class))[i], "$", sep = ""), x = cols\$V1)]
+} else {
+   for(i in 1:length(levels(as.factor(counts\$Super_family)))){
+  cols[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Super_family))[i], "$", sep = ""), x = cols\$V1)]
 }
+
+
 
 if(subc == TRUE){
 
@@ -358,6 +373,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Super_family))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
+           scale_color_manual(values=cols)+
            scale_y_continuous(trans='log10', labels = comma)+ #  breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
            scale_x_continuous(trans='log10', labels = comma)+ # breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
            xlab(paste(data1, " (%)", sep = ""))+
@@ -388,6 +404,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Super_family))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
+           scale_color_manual(values=cols)+
            scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            xlab(paste(data1, " (equivalent copy)", sep = ""))+
@@ -420,6 +437,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
+           scale_color_manual(values=cols)+
            scale_y_continuous(trans='log10', labels = comma)+
            scale_x_continuous(trans='log10', labels = comma)+
            xlab(paste(data1, " (%)", sep = ""))+
@@ -450,6 +468,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
+           scale_color_manual(values=cols)+
            scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            xlab(paste(data1, " (equivalent copy)", sep = ""))+
