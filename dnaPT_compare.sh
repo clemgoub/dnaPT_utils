@@ -345,24 +345,42 @@ write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 # Plot!
 
+# filter on min percent or ecp
+if(subc == TRUE){
+   if(ecp_status == FALSE){
+      print("filtering percent counts...")
+      counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
+    } else {
+      print("filtering ecp counts...")
+      counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
+    }
+} else {
+    if(ecp_status == FALSE){
+      print("filtering percent counts...")
+      counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
+    } else {
+      counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
+      print("plotting ecp...")
+    }
+}
 
 # filter only TE if asked
 if(te_choice == TRUE){
    print("filtering only TE...")
-   counts<-counts[grep("LTR|LINE|SINE|DNA|RC|Unknown", counts\$Class),]
-   }
+   counts_t<-counts_t[grep("LTR|LINE|SINE|DNA|RC|Unknown", counts_t\$Class),]
+}
 
 # find corresponding colors
 print("picking colors...")
 colors<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
 print(head(colors))
-cols<-rep("", length((levels(as.factor(counts\$Class)))))
+cols<-rep("", length((levels(as.factor(counts_t\$Class)))))
 if(subc == FALSE){
-  for(i in 1:length(levels(as.factor(counts\$Class)))){
-  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Class))[i], "$", sep = ""), x = colors\$V1)]}
+  for(i in 1:length(levels(as.factor(counts_t\$Class)))){
+  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts_t\$Class))[i], "$", sep = ""), x = colors\$V1)]}
 } else {
-   for(i in 1:length(levels(as.factor(counts\$Super_family)))){
-  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Super_family))[i], "$", sep = ""), x = colors\$V1)]}
+   for(i in 1:length(levels(as.factor(counts_t\$Super_family)))){
+  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts_t\$Super_family))[i], "$", sep = ""), x = colors\$V1)]}
 }
 
 
@@ -370,8 +388,6 @@ if(subc == FALSE){
 if(subc == TRUE){
 
    if(ecp_status == FALSE){
-   print("filtering percent counts...")
-   counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
    print("plotting percent...")
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Super_family))+
            geom_point()+
@@ -399,9 +415,6 @@ if(subc == TRUE){
      units = "px"
    )
    } else {
-   print("filtering ecp counts...")
-   #counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
-   counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
    print("plotting ecp...")
    #ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Super_family))+
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Super_family))+
@@ -434,8 +447,6 @@ if(subc == TRUE){
    } else {
 
    if(ecp_status == FALSE){
-   print("filtering percent counts...")
-   counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
    print("plotting percent...")
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
            geom_point()+
@@ -464,9 +475,6 @@ if(subc == TRUE){
    )
    } else {
    print("filtering ecp counts...")
-   #counts_t<-as.data.frame(counts[counts[,10] >= ecp_T & counts[,11] >= ecp_T,])
-   counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
-   print("plotting ecp...")
    #ggplot(na.omit(counts_t), aes(as.numeric(paste(data1, "_ecp", sep = "")), as.numeric(paste(data2, "_ecp", sep = "")), col = Class))+
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
            geom_point()+
