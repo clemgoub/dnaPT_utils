@@ -354,7 +354,7 @@ if(te_choice == TRUE){
 
 # find corresponding colors
 print("picking colors...")
-cols<-read.table("$DIR/colors.land", sep = "\t")
+cols<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
 cols<-rep("", length((levels(as.factor(counts\$Class)))))
 if(subc == FALSE){
 for(i in 1:length(levels(as.factor(counts\$Class)))){
