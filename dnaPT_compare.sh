@@ -15,6 +15,16 @@ function usage()
 
    **************************************
 
+          __            ____  ______                                                      __  
+     ____/ /___  ____ _/ __ \/_  __/   _________  ____ ___  ____  ____ _________    _____/ /_ 
+    / __  / __ \/ __ \`/ /_/ / / /_____/ ___/ __ \/ __ \`__ \/ __ \/ __ \`/ ___/ _ \  / ___/ __ \
+   / /_/ / / / / /_/ / ____/ / /_____/ /__/ /_/ / / / / / / /_/ / /_/ / /  /  __/ (__  ) / / /
+   \__,_/_/ /_/\__,_/_/     /_/      \___/\____/_/ /_/ /_/ .___/\__,_/_/   \___(_)____/_/ /_/ 
+                                                        /_/                                   
+
+   Author: Clément Goubert
+   Date of last revision: 02/08/2022
+
    This script measures the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE. 
    
    1/ Shared families are identified by clustering together the repeat sequences ("Trinity.fasta") of each dataset. The clus
@@ -33,8 +43,8 @@ function usage()
    
    Dependencies:
 
-   - CD-HIT
-   - R + packages "ggplot2", "scales", "tidyr", "reshape2"         
+   - CD-HIT (https://github.com/weizhongli/cdhit)
+   - R + packages "ggplot2", "scales", "tidyr", "reshape2" (https://www.r-bloggers.com/2010/11/installing-r-packages/)
 
    ***************************************
 
@@ -274,7 +284,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 # MAIN                                                                         #
 ################################################################################
 # read main table and shell variables
-print("load variables...")
+# print("load variables...")
 input<-paste("$OUTF", "/", "$PREFA", "_", "$PREFB", "_R.tsv", sep = "") # maybe change such as the file is a variable already?
 data1<-"$PREFA"
 data2<-"$PREFB"
@@ -286,60 +296,59 @@ te_choice<-"$TE"
 subc<-"$SUB"
 dir<-"$DIR"
 
-print("load table...")
+# print("load table...")
 DD<-read.table(input)
 # create a column with dataset name
-print("split column...")
+# print("split column...")
 DD<-separate(DD, V1, c("V1.1", "V1.2"), sep = "_comp_") 
 # rename the columns
-print("rename columns...")
+# print("rename columns...")
 names(DD)<-c("dataset", "contig", "cluster", "length", "status", "TE_name", "TE_Class", "reads", "bp", "total_SP")
 # create a column with the percentage genome per contig per dataset
-print("compute percentages...")
+# print("compute percentages...")
 DD\$pc<-DD\$bp/DD\$total*100 
 # aggregate the count (in %) for each cluster and each dataset
-print("run dcast and convert table...")
+# print("run dcast and convert table...")
 counts<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "pc", fun.aggregate = sum))) 
 counts\$cluster<-rownames(counts)
 counts<-counts[-1,]
 names(counts)<-c(data1, data2, "cluster")
 # create a table with only one annotation per cluster (from REPresentative sequence of CD-HIT)
-print("filter down to shared clusters...")
+# print("filter down to shared clusters...")
 Drep<-DD[DD\$status == "REP",]
 counts\$TE_class<-Drep\$TE_Class
-#print(head(counts))
+# print(head(counts))
 
-print("new additions...")
-print("dcast bp...")
+# print("new additions...")
+# print("dcast bp...")
 bp<-as.data.frame(t(dcast(DD, formula = dataset~as.factor(cluster), value.var = "bp", fun.aggregate = sum)))
 bp<-bp[-1,]
-print("rename column with paste function...")
+# print("rename column with paste function...")
 names(bp)<-c(paste(data1, "_bp", sep = ""), paste(data2, "_bp", sep = ""))
-print("cbind tables...")
+# print("cbind tables...")
 counts<-cbind(counts, bp)
 counts\$REPlen<-Drep\$length
-print("get rep name...")
+# print("get rep name...")
 counts\$REPname<-paste(Drep\$dataset, Drep\$contig, sep = "_")
-print("split class...")
+# print("split class...")
 counts<-separate(counts, TE_class, c("Class", "Super_family"), sep = "/",fill = "right") 
-print("rename Unknowns...")
+# print("rename Unknowns...")
 counts\$Class[is.na(counts\$Class)]<-"Unknown"
-print("consolidate SF column...")
+# print("consolidate SF column...")
 counts\$Super_family<-paste(counts\$Class, counts\$Super_family, sep = "/")
-print("renames NA in SF columns...")
+# print("renames NA in SF columns...")
 counts\$Super_family[counts\$Super_family == "Unknown/NA"]<-"Unknown"
-print(counts[1:20,])
-print("compute ecp...")
+# print(counts[1:20,])
+# print("compute ecp...")
 ecps<-as.data.frame(cbind(as.numeric(counts[,6])/counts\$REPlen, as.numeric(counts[,7])/counts\$REPlen))
-print("rename ecp cols...")
-print(ecps[1:10,])
-print(c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = "")))
-#names(ecps)<-c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = ""))
+# print("rename ecp cols...")
+# print(ecps[1:10,])
+# print(c(paste(data1, "_ecp", sep = ""), paste(data2, "_ecp", sep = "")))
 names(ecps)<-c("ecp_1", "ecp_2")
-print("binds to main table...")
+# print("binds to main table...")
 counts<-cbind(counts, ecps)
 
-print("exporting table...")
+print("exporting unfiltered table...")
 write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 
@@ -348,32 +357,32 @@ write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 # filter on min percent or ecp
 if(subc == TRUE){
    if(ecp_status == FALSE){
-      print("filtering percent counts...")
+      # print("filtering percent counts...")
       counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
     } else {
-      print("filtering ecp counts...")
+      # print("filtering ecp counts...")
       counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
     }
 } else {
     if(ecp_status == FALSE){
-      print("filtering percent counts...")
+      # print("filtering percent counts...")
       counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
     } else {
+      # print("filtering ecp counts...")
       counts_t<-counts[counts\$ecp_1 >= ecp_T & counts\$ecp_2 >= ecp_T,]
-      print("plotting ecp...")
-    }
+   }
 }
 
 # filter only TE if asked
 if(te_choice == TRUE){
-   print("filtering only TE...")
+   # print("filtering only TE...")
    counts_t<-counts_t[grep("LTR|LINE|SINE|DNA|RC|Unknown", counts_t\$Class),]
 }
 
 # find corresponding colors
-print("picking colors...")
+# print("picking colors...")
 colors<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
-print(head(colors))
+# print(head(colors))
 cols<-rep("", length((levels(as.factor(counts_t\$Class)))))
 if(subc == FALSE){
   for(i in 1:length(levels(as.factor(counts_t\$Class)))){
@@ -403,7 +412,7 @@ if(subc == TRUE){
                  panel.grid.minor = element_blank(),
                  panel.border = element_blank(),
                  panel.background = element_blank())
-   print("export pc plot...")
+   # print("export pc plot...")
    ggsave(
      paste(data1, data2, "shared_families_percent.pdf", sep = "_"),
      plot = plot,
@@ -431,7 +440,7 @@ if(subc == TRUE){
                  panel.grid.minor = element_blank(),
                  panel.border = element_blank(),
                  panel.background = element_blank())
-   print("export ecp plot...")
+   # print("export ecp plot...")
    ggsave(
     paste(data1, data2, "shared_families_ecp.pdf", sep = "_"),
     plot = plot,
@@ -462,7 +471,7 @@ if(subc == TRUE){
                  panel.grid.minor = element_blank(),
                  panel.border = element_blank(),
                  panel.background = element_blank())
-   print("export pc plot...")
+   # print("export pc plot...")
    ggsave(
      paste(data1, data2, "shared_families_percent.pdf", sep = "_"),
      plot = plot,
@@ -490,7 +499,7 @@ if(subc == TRUE){
                  panel.grid.minor = element_blank(),
                  panel.border = element_blank(),
                  panel.background = element_blank())
-   print("export ecp plot...")
+   # print("export ecp plot...")
    ggsave(
     paste(data1, data2, "shared_families_ecp.pdf", sep = "_"),
     plot = plot,
@@ -504,3 +513,5 @@ if(subc == TRUE){
    }
 }
 SCRIPT
+
+echo "All done, results in $OUTF/"
