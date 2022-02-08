@@ -284,6 +284,7 @@ pc_T<-as.numeric("$TPERC")
 ecp_T<-as.numeric("$TECP")
 te_choice<-"$TE"
 subc<-"$SUB"
+dir<-"$DIR"
 
 print("load table...")
 DD<-read.table(input)
@@ -347,11 +348,12 @@ write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 
 # filter only TE if asked
 if(te_choice == TRUE){
-   print("filtering only TE")
+   print("filtering only TE...")
    counts<-counts[grep("LTR|LINE|SINE|DNA|RC|Unknown", counts\$Class),]
    }
 
 # find corresponding colors
+print("picking colors...")
 cols<-read.table("$DIR/colors.land", sep = "\t")
 cols<-rep("", length((levels(as.factor(counts\$Class)))))
 if(subc == FALSE){
