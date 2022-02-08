@@ -21,7 +21,7 @@ function usage()
 
    This script perform at "TE landscape" analysis, i.e., it plots an histogram of the blastn divergence between raw reads (TE
    copies in the genomes) and their consensus sequences assembled in "Trinity.fasta". The script plots only putative TE seque
-   -nce among "LINE", "SINE", "LTR", "DNA" and "Unknown" (a.k.a. "NA"). 
+   -nce among "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown" (a.k.a. "NA"). 
 
    Dependencies:
    - R + package "ggplot2" (https://www.r-bloggers.com/2010/11/installing-r-packages/)
@@ -36,7 +36,7 @@ function usage()
    options:
     -p, --prefix                 prefix to append to the output filename: "<prefix>_landscapes.pdf"
     -o, --output                 output folder (path); default: dnaPipeTE output directory
-    -S, --subclass               Plot with subclass information (instead of Class)
+    -S, --superfamily            Plot with super-family information (instead of sub-class)
     -h, --help                   Prints this message and exit
 
 HEREDOC
@@ -155,8 +155,8 @@ while (( "$#" )); do
      #     ECP=TRUE
      #     shift
      #    ;;
-     -S | --subclass)
-         SUB=TRUE
+     -S | --superfamily)
+         SF=TRUE
          shift
         ;;         
     -*|--*=) # unsupported flags
@@ -181,13 +181,13 @@ eval set -- "$PARAMS"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 # asign default value and print parameters
 OUTF="${OUTF:-$DSA}"
-SUB="${SUB:-FALSE}"
+SF="${SF:-FALSE}"
 PREF="${PREF:-dnaPipeTE}"
 # param check
 echo "input dataset:      $DSA"
 echo "output folder:      $OUTF"
 echo "output prefix:      $PREF"
-echo "Subclass level:     $SUB"
+echo "super-family level: $SF"
 
 ############ START ############
 
@@ -214,36 +214,67 @@ invisible(lapply(packages, library, character.only = TRUE))
 ################################################################################
 # read main table and shell variables
 print("load variables...")
+sf_choice<-"$SF"
 # join the reads with annotations and format table for R
 land<-read.table(sep = "\t", text=system("join -a1 -12 -21 -o 1.3,2.4,2.5  $DSA/Annotation/sorted_blast3 $DSA/Annotation/one_RM_hit_per_Trinity_contigs | awk '/LINE/ { print \$0 \"\\t\" \$3; next} /LTR/ {print \$0 \"\\t\" \$3; next} /SINE/ {print \$0 \"\\tSINE\"; next} /DNA/ {print \$0 \"\\tDNA\"; next} /MITE/ {print \$0 \"\\tMITE\";next} /RC/ {print \$0 \"\\tRC\";next} /Unknown/ {print \$0 \"\\tUnknown\";next} !/Simple_repeat|Low_complexity|Satellite|srpRNA|rRNA|tRNA|snRNA/ {if (NF == 3) {print \$0\"\tOthers\"} else {print \$0\"\\tNA\\tUnknown\\tUnknown\"}}' | sed 's/ /\t/g;s/\t\t\t/\\t/g' ", intern = T))
 reads.c<-as.numeric(system("grep -c '>' $DSA/renamed.blasting_reads.fasta", intern = T))
+# split between subclass and superfamily
+land<-separate(land, V3, c("Sub_class", "SF"), sep = "/",fill = "right") 
+names(land)<-c("div", "TE_family", "TE_subclass", "TE_SF", "TE_superfamily")
 
 # pick the colors
 cols<-read.table("$DIR/colors.land", sep = "\t")
-col.lands<-rep("", length((levels(as.factor(land\$V4)))))
-for(i in 1:length(levels(as.factor(land\$V4)))){
-  col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$V4))[i], "$", sep = ""), x = cols\$V1)]
+
+if(sf_choice == TRUE){
+   col.lands<-rep("", length((levels(as.factor(land\$TE_superfamily)))))
+   for(i in 1:length(levels(as.factor(land\$TE_superfamily)))){
+      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$div)]
+   }
+   # plot
+   lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
+     geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
+     scale_fill_manual(values = col.lands)+
+     ylab("genome %")+
+     xlab("blastn divergence (read vs dnaPipeTE contig)")
+
+   # export
+   ggsave(
+       file = paste("$PREF", "_landscapes_superfamily.pdf", sep = ""),
+       plot = lscapes,
+       device = "pdf",
+       path = "$OUTF",
+       scale = 1,
+       width = 2600,
+       height = 2000,
+       units = "px"
+      )
+
+} else {
+
+   col.lands<-rep("", length((levels(as.factor(land\$TE_subclass)))))
+   for(i in 1:length(levels(as.factor(land\$TE_subclass)))){
+      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$div)]
+   }
+   # plot
+   lscapes<-ggplot(land, aes(100-div, fill = TE_subclass))+
+     geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
+     scale_fill_manual(values = col.lands)+
+     ylab("genome %")+
+     xlab("blastn divergence (read vs dnaPipeTE contig)")
+
+   # export
+   ggsave(
+       file = paste("$PREF", "_landscapes_subclass.pdf", sep = ""),
+       plot = lscapes,
+       device = "pdf",
+       path = "$OUTF",
+       scale = 1,
+       width = 2600,
+       height = 2000,
+       units = "px"
+      )
+
 }
-
-# plot
-lscapes<-ggplot(land, aes(100-V1, fill = V4))+
-  geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
-  scale_fill_manual(values = col.lands)+
-  ylab("genome %")+
-  xlab("blastn divergence (read vs dnaPipeTE contig)")
-
-# export
-ggsave(
-    file = paste("$PREF", "_landscapes.pdf", sep = ""),
-    plot = lscapes,
-    device = "pdf",
-    path = "$OUTF",
-    scale = 1,
-    width = 2600,
-    height = 2000,
-    units = "px"
-   )
-
 SCRIPT
 
 echo "All done, results in $OUTF/"
