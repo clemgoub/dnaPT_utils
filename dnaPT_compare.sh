@@ -358,11 +358,11 @@ colors<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
 print(head(colors))
 cols<-rep("", length((levels(as.factor(counts\$Class)))))
 if(subc == FALSE){
-for(i in 1:length(levels(as.factor(counts\$Class)))){
-  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Class))[i], "\$", sep = ""), x = colors\$V1)]}
+  for(i in 1:length(levels(as.factor(counts\$Class)))){
+  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Class))[i], "$", sep = ""), x = colors\$V1)]}
 } else {
    for(i in 1:length(levels(as.factor(counts\$Super_family)))){
-  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Super_family))[i], "\$", sep = ""), x = colors\$V1)]}
+  cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts\$Super_family))[i], "$", sep = ""), x = colors\$V1)]}
 }
 
 
