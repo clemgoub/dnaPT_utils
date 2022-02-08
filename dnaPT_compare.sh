@@ -52,8 +52,8 @@ function usage()
     -o, --output                 output folder (path)
 
    options:
-    -T, --te_only                Only plot repeats of the classes "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown"
-    -S, --subclass               Plot with subclass information (instead of Class)
+    -T, --te_only                Only plot repeats of the sub-classes "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown"
+    -S, --superfamily            Plot with superfamily information (instead of Class)
     -p, --percent_threshold      min. percent genome to plot (default = 0) / not used if -E/-ecp selected
     -E, --ecp                    perform comparison in equivalent copy (dataset counts in bp / representative sequence size)
                                  Caution: the length used for normalization is based on the length of the representative seq
@@ -180,8 +180,8 @@ while (( "$#" )); do
          ECP=TRUE
          shift
         ;;
-     -S | --subclass)
-         SUB=TRUE
+     -S | --superfamily)
+         SF=TRUE
          shift
         ;;         
     -*|--*=) # unsupported flags
@@ -211,7 +211,7 @@ ECP="${ECP:-FALSE}"
 TPERC="${TPERC:-0}"
 TECP="${TECP:-0}"
 TE="${TE:-FALSE}"
-SUB="${SUB:-FALSE}"
+SF="${SF:-FALSE}"
 
 # param check
 echo "dataset A:          $DSA"
@@ -224,7 +224,7 @@ echo "ecp:                $ECP"
 echo "percent threshold:  $TPERC"
 echo "ecp threshold:      $TECP"
 echo "TE only:            $TE"
-echo "Subclass level:     $SUB"
+echo "Superfamily level   $SF"
 
 # check exclusive parameters
 # if [ ${PERC} == TRUE ] && [ ${ECP} == TRUE ]; then
@@ -287,7 +287,7 @@ ecp_status<-"$ECP"
 pc_T<-as.numeric("$TPERC")
 ecp_T<-as.numeric("$TECP")
 te_choice<-"$TE"
-subc<-"$SUB"
+supf<-"$SF"
 dir<-"$DIR"
 
 # print("load table...")
@@ -349,7 +349,7 @@ write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
 # Plot!
 
 # filter on min percent or ecp
-if(subc == TRUE){
+if(supf == TRUE){
    if(ecp_status == FALSE){
       # print("filtering percent counts...")
       counts_t<-as.data.frame(counts[counts[,1] >= pc_T & counts[,2] >= pc_T,])
@@ -378,7 +378,7 @@ if(te_choice == TRUE){
 colors<-read.table(paste(dir, "/colors.land", sep = ""), sep = "\t")
 # print(head(colors))
 cols<-rep("", length((levels(as.factor(counts_t\$Class)))))
-if(subc == FALSE){
+if(supf == FALSE){
   for(i in 1:length(levels(as.factor(counts_t\$Class)))){
   cols[i]<-colors\$V2[grep(pattern = paste("^", levels(as.factor(counts_t\$Class))[i], "$", sep = ""), x = colors\$V1)]}
 } else {
@@ -388,14 +388,14 @@ if(subc == FALSE){
 
 
 
-if(subc == TRUE){
+if(supf == TRUE){
 
    if(ecp_status == FALSE){
    print("plotting percent...")
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Super_family))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
-           scale_color_manual(values=cols)+
+           scale_color_manual(values=cols, name = "TE superfamily")+
            scale_y_continuous(trans='log10', labels = comma)+ #  breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
            scale_x_continuous(trans='log10', labels = comma)+ # breaks = c(0, 0.001, 0.01, 0.1, 1, 10))+
            xlab(paste(data1, " (%)", sep = ""))+
@@ -423,7 +423,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Super_family))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
-           scale_color_manual(values=cols)+
+           scale_color_manual(values=cols, name = "TE superfamily")+
            scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            xlab(paste(data1, " (equivalent copy)", sep = ""))+
@@ -454,7 +454,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(as.numeric(!!ensym(data1)), as.numeric(!!ensym(data2)), col = Class))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
-           scale_color_manual(values=cols)+
+           scale_color_manual(values=cols, name = "TE subclass")+
            scale_y_continuous(trans='log10', labels = comma)+
            scale_x_continuous(trans='log10', labels = comma)+
            xlab(paste(data1, " (%)", sep = ""))+
@@ -482,7 +482,7 @@ if(subc == TRUE){
    plot<-ggplot(na.omit(counts_t), aes(ecp_1, ecp_2, col = Class))+
            geom_point()+
            geom_abline(slope = 1, intercept = 0, col = "grey")+
-           scale_color_manual(values=cols)+
+           scale_color_manual(values=cols, name = "TE subclass")+
            scale_y_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            scale_x_continuous(trans='log10')+ #, breaks = c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000))+
            xlab(paste(data1, " (equivalent copy)", sep = ""))+
