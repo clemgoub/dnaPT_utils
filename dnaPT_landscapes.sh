@@ -215,7 +215,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 # read main table and shell variables
 print("load variables...")
 # join the reads with annotations and format table for R
-land<-read.table(sep = "\t", text=system("join -a1 -12 -21 -o 1.3,2.4,2.5  $DSA/Annotation/sorted_blast3 $DSA/Annotation/one_RM_hit_per_Trinity_contigs | awk '/LINE/ { print \$0 \"\\t\" \$3; next} /LTR/ {print \$0 \"\\t\" \$3; next} /SINE/ {print \$0 \"\\tSINE\"; next} /DNA/ {print \$0 \"\\tDNA\"; next} /MITE/ {print \$0 \"\\tMITE\";next} /Unknown/ {print \$0 \"\\tUnknown\";next} {if (NF == 3) {print \$0\"\tOthers\"} else {print \$0\"\\tNA\\tUnknown\\tUnknown\"}}' | sed 's/ /\t/g;s/\t\t\t/\\t/g' ", intern = T))
+land<-read.table(sep = "\t", text=system("join -a1 -12 -21 -o 1.3,2.4,2.5  $DSA/Annotation/sorted_blast3 $DSA/Annotation/one_RM_hit_per_Trinity_contigs | awk '/LINE/ { print \$0 \"\\t\" \$3; next} /LTR/ {print \$0 \"\\t\" \$3; next} /SINE/ {print \$0 \"\\tSINE\"; next} /DNA/ {print \$0 \"\\tDNA\"; next} /MITE/ {print \$0 \"\\tMITE\";next} /RC/ {print \$0 \"\\tRC\";next} /Unknown/ {print \$0 \"\\tUnknown\";next} !/Simple_repeat|Low_complexity|Satellite|srpRNA|rRNA|tRNA|snRNA/ {if (NF == 3) {print \$0\"\tOthers\"} else {print \$0\"\\tNA\\tUnknown\\tUnknown\"}}' | sed 's/ /\t/g;s/\t\t\t/\\t/g' ", intern = T))
 reads.c<-as.numeric(system("grep -c '>' $DSA/renamed.blasting_reads.fasta", intern = T))
 
 # pick the colors

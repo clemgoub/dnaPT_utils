@@ -52,7 +52,7 @@ function usage()
     -o, --output                 output folder (path)
 
    options:
-    -T, --te_only                Only plot repeats of the classes "LINE", "SINE", "LTR", "DNA" and "Unknown"
+    -T, --te_only                Only plot repeats of the classes "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown"
     -S, --subclass               Plot with subclass information (instead of Class)
     -p, --percent_threshold      min. percent genome to plot (default = 0) / not used if -E/-ecp selected
     -E, --ecp                    perform comparison in equivalent copy (dataset counts in bp / representative sequence size)
