@@ -14,16 +14,10 @@ function usage()
    cat << HEREDOC
 
    **************************************
-
-          __            ____  ______                                                      __  
-     ____/ /___  ____ _/ __ \/_  __/   _________  ____ ___  ____  ____ _________    _____/ /_ 
-    / __  / __ \/ __ \`/ /_/ / / /_____/ ___/ __ \/ __ \`__ \/ __ \/ __ \`/ ___/ _ \  / ___/ __ \
-   / /_/ / / / / /_/ / ____/ / /_____/ /__/ /_/ / / / / / / /_/ / /_/ / /  /  __/ (__  ) / / /
-   \__,_/_/ /_/\__,_/_/     /_/      \___/\____/_/ /_/ /_/ .___/\__,_/_/   \___(_)____/_/ /_/ 
-                                                        /_/                                   
-
-   Author: Clément Goubert
-   Date of last revision: 02/08/2022
+   >>>        dnaPT_compare.sh        <<<
+   **************************************
+   Author: Clément Goubert - goubert.clement@gmail.com
+   Last revision: 02/08/2022
 
    This script measures the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE. 
    
@@ -48,7 +42,7 @@ function usage()
 
    ***************************************
 
-   Usage: ./dnaPT_compare.sh -A <dataset_A_directory> -a <prefix_A> -B <dataset_B_directory> -b <prefix_B> -o <output_folder>
+   Usage: ./dnaPT_compare.sh -A <dataset_A_directory> -a <prefix_A> -B <dataset_B_directory> -b <prefix_B> -o <output_folder> [options]
 
    mendatory arguments:
     -A, --dir_A                  dnaPipeTE output directory for dataset A (path)
