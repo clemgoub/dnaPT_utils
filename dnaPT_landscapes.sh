@@ -228,7 +228,7 @@ cols<-read.table("$DIR/colors.land", sep = "\t")
 if(sf_choice == TRUE){
    col.lands<-rep("", length((levels(as.factor(land\$TE_superfamily)))))
    for(i in 1:length(levels(as.factor(land\$TE_superfamily)))){
-      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$div)]
+      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
    }
    # plot
    lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
@@ -253,7 +253,7 @@ if(sf_choice == TRUE){
 
    col.lands<-rep("", length((levels(as.factor(land\$TE_subclass)))))
    for(i in 1:length(levels(as.factor(land\$TE_subclass)))){
-      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$div)]
+      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)]
    }
    # plot
    lscapes<-ggplot(land, aes(100-div, fill = TE_subclass))+
