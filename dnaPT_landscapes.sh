@@ -230,7 +230,7 @@ reads.c<-as.numeric(system("grep -c '>' $DSA/renamed.blasting_reads.fasta", inte
 land<-separate(land, V3, c("Sub_class", "SF"), sep = "/",fill = "right") 
 names(land)<-c("div", "TE_family", "TE_subclass", "TE_SF", "TE_superfamily")
 # remove Unknown if asked
-# print(paste("print unknow is set to ", unk, sep = ""))
+# print(paste("print unknown is set to ", unk, sep = ""))
 if(unk == FALSE){land<-land[!land\$TE_subclass == "Unknown",]}
 # pick the colors
 cols<-read.table("$DIR/colors.land", sep = "\t")
