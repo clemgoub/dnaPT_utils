@@ -37,6 +37,8 @@ function usage()
     -p, --prefix                 prefix to append to the output filename: "<prefix>_landscapes.pdf"
     -o, --output                 output folder (path); default: dnaPipeTE output directory
     -S, --superfamily            Plot with superfamily information (instead of subclass)
+    -y, --ylim                   Max value for the y axis (genome %) [0-100]
+    -U, --no-unknown             Remove unclassified repeats
     -h, --help                   Prints this message and exit
 
 HEREDOC
@@ -76,16 +78,16 @@ while (( "$#" )); do
    #      exit 1
        fi
        ;;    
-   # -a|--pref_A)
-   #    if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-   #      PREFA=$2
-   #      shift 2
+    -y|--ylim)
+       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+         YMAX=$2
+         shift 2
    #    else
    #      echo "Error: missing prefix for dataset A" >&2
    #      usage
    #      exit 1
-   #    fi
-   #    ;;
+       fi
+       ;;
    # -b|--pref_B)
    #    if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
    #      PREFB=$2
@@ -151,10 +153,10 @@ while (( "$#" )); do
      #      TE=TRUE
      #      shift
      #    ;; 
-     # -E | --ecp)
-     #     ECP=TRUE
-     #     shift
-     #    ;;
+     -U | --no-unknown)
+         UNK=FALSE
+         shift
+        ;;
      -S | --superfamily)
          SF=TRUE
          shift
@@ -183,11 +185,15 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 OUTF="${OUTF:-$DSA}"
 SF="${SF:-FALSE}"
 PREF="${PREF:-dnaPipeTE}"
+YMAX="${YMAX:-FALSE}"
+UNK="${UNK:-TRUE}"
 # param check
 echo "input dataset:      $DSA"
 echo "output folder:      $OUTF"
 echo "output prefix:      $PREF"
 echo "super-family level: $SF"
+echo "custom ylim:        $YMAX"
+echo "plotting Unknown:   $UNK"
 
 ############ START ############
 
@@ -215,13 +221,16 @@ invisible(lapply(packages, library, character.only = TRUE))
 # read main table and shell variables
 print("load variables...")
 sf_choice<-"$SF"
+ymax<-"$YMAX"
+unk<-"$UNK"
 # join the reads with annotations and format table for R
-land<-read.table(sep = "\t", text=system("join -a1 -12 -21 -o 1.3,2.4,2.5  $DSA/Annotation/sorted_blast3 $DSA/Annotation/one_RM_hit_per_Trinity_contigs | awk '/LINE/ { print \$0 \"\\t\" \$3; next} /LTR/ {print \$0 \"\\t\" \$3; next} /SINE/ {print \$0 \"\\tSINE\"; next} /DNA/ {print \$0 \"\\tDNA\"; next} /MITE/ {print \$0 \"\\tMITE\";next} /RC/ {print \$0 \"\\tRC\";next} /Unknown/ {print \$0 \"\\tUnknown\";next} !/Simple_repeat|Low_complexity|Satellite|srpRNA|rRNA|tRNA|snRNA/ {if (NF == 3) {print \$0\"\tOthers\"} else {print \$0\"\\tNA\\tUnknown\\tUnknown\"}}' | sed 's/ /\t/g;s/\t\t\t/\\t/g' ", intern = T))
+land<-read.table(sep = "\t", text=system("join -a1 -12 -21 -o 1.3,2.4,2.5  $DSA/Annotation/sorted_blast3 $DSA/Annotation/one_RM_hit_per_Trinity_contigs | awk '/LINE/ { print \$0 \"\\t\" \$3; next} /LTR/ {print \$0 \"\\t\" \$3; next} /SINE/ {print \$0 \"\\tSINE\"; next} /DNA/ {print \$0 \"\\tDNA\"; next} /MITE/ {print \$0 \"\\tMITE\";next} /RC/ {print \$0 \"\\tRC\";next} /Unknown/ {print \$0 \"\\tUnknown\";next} !/Simple_repeat|Low_complexity|Satellite|srpRNA|rRNA|tRNA|snRNA|ARTEFACT/ {if (NF == 3) {print \$0\"\tOthers\"} else {print \$0\"\\tNA\\tUnknown\\tUnknown\"}}' | sed 's/ /\t/g;s/\t\t\t/\\t/g' ", intern = T))
 reads.c<-as.numeric(system("grep -c '>' $DSA/renamed.blasting_reads.fasta", intern = T))
 # split between subclass and superfamily
 land<-separate(land, V3, c("Sub_class", "SF"), sep = "/",fill = "right") 
 names(land)<-c("div", "TE_family", "TE_subclass", "TE_SF", "TE_superfamily")
-
+# remove Unknown if asked
+if(unk == FALSE){land<-land[!land\$TE_subclass == "Unknown",]}
 # pick the colors
 cols<-read.table("$DIR/colors.land", sep = "\t")
 
@@ -231,11 +240,17 @@ if(sf_choice == TRUE){
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
    }
    # plot
-   lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
+   lscapes<-ggplot(na.omit(land), aes(100-div, fill = TE_superfamily))+
      geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
      scale_fill_manual(values = col.lands)+
+     {if(ymax != FALSE)ylim(0,ymax)}+
      ylab("genome %")+
-     xlab("blastn divergence (read vs dnaPipeTE contig)")
+     xlab("blastn divergence (read vs dnaPipeTE contig)")+
+     theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
 
    # export
    ggsave(
@@ -256,11 +271,17 @@ if(sf_choice == TRUE){
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)]
    }
    # plot
-   lscapes<-ggplot(land, aes(100-div, fill = TE_subclass))+
+   lscapes<-ggplot(na.omit(land), aes(100-div, fill = TE_subclass))+
      geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
      scale_fill_manual(values = col.lands)+
+     {if(ymax != FALSE)ylim(0,ymax)}+
      ylab("genome %")+
-     xlab("blastn divergence (read vs dnaPipeTE contig)")
+     xlab("blastn divergence (read vs dnaPipeTE contig)")+
+     theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
 
    # export
    ggsave(
