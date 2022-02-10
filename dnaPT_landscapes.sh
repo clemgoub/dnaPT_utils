@@ -230,7 +230,7 @@ reads.c<-as.numeric(system("grep -c '>' $DSA/renamed.blasting_reads.fasta", inte
 land<-separate(land, V3, c("Sub_class", "SF"), sep = "/",fill = "right") 
 names(land)<-c("div", "TE_family", "TE_subclass", "TE_SF", "TE_superfamily")
 # remove Unknown if asked
-print(paste("print unknow is set to ", unk, sep = ""))
+# print(paste("print unknow is set to ", unk, sep = ""))
 if(unk == FALSE){land<-land[!land\$TE_subclass == "Unknown",]}
 # pick the colors
 cols<-read.table("$DIR/colors.land", sep = "\t")
@@ -241,7 +241,7 @@ if(sf_choice == TRUE){
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
    }
    # plot
-   lscapes<-ggplot(na.omit(land), aes(100-div, fill = TE_superfamily))+
+   lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
      geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
      scale_fill_manual(values = col.lands)+
      {if(ymax != FALSE)ylim(0,ymax)}+
@@ -272,7 +272,7 @@ if(sf_choice == TRUE){
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)]
    }
    # plot
-   lscapes<-ggplot(na.omit(land), aes(100-div, fill = TE_subclass))+
+   lscapes<-ggplot(land, aes(100-div, fill = TE_subclass))+
      geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
      scale_fill_manual(values = col.lands)+
      {if(ymax != FALSE)ylim(0,ymax)}+
