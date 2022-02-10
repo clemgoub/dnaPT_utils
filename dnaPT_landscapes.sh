@@ -244,7 +244,7 @@ if(sf_choice == TRUE){
    lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
      geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
      scale_fill_manual(values = col.lands)+
-     {if(ymax != FALSE)ylim(0,ymax)}+
+     {if(ymax != FALSE)ylim(0,as.numeric(ymax))}+
      ylab("genome %")+
      xlab("blastn divergence (read vs dnaPipeTE contig)")+
      theme(axis.line = element_line(colour = "black"),
@@ -275,7 +275,7 @@ if(sf_choice == TRUE){
    lscapes<-ggplot(land, aes(100-div, fill = TE_subclass))+
      geom_histogram(aes(y=..count../reads.c*100), binwidth = 1)+
      scale_fill_manual(values = col.lands)+
-     {if(ymax != FALSE)ylim(0,ymax)}+
+     {if(ymax != FALSE)ylim(0,as.numeric(ymax))}+
      ylab("genome %")+
      xlab("blastn divergence (read vs dnaPipeTE contig)")+
      theme(axis.line = element_line(colour = "black"),
