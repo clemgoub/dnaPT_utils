@@ -25,7 +25,7 @@ function usage()
    -tering is performed with cd-hit-est with the parameters described in Goubert et al, 2021 (Mobile DNA, in press) and appr
    -oximate the "80-80-80" rule. 
    
-   2/ Shared families are identified by selecting clusters were sequences from both dataset A and B are present. For each cl
+   2/ Shared families are identified by selecting clusters where sequences from both dataset A and B are present. For each cl
    -uster, the counts (in bp) and genome % are summed per dataset to obain a quantification of each shared family. The class
    -ification of a shared repeat is taken from the representative sequence of each cluster, and correspond to the longest se
    -quence in the cluster. It can either come from dataset A or B. 
