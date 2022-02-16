@@ -248,7 +248,7 @@ rca_t\$x1<-as.numeric(rca_t\$x2)-as.numeric(rca_t\$perc_g)
 
 ############ BARPLOT #############################
 # pick the colors
-cols<-read.table("../dnaPT_utils/colors.land", sep = "\t")
+cols<-read.table("$DIR/colors.land", sep = "\t")
 cols[length(cols\$V1)+1,]<-c(paste("repeats_under_", threshold, "%", sep = ""), "grey10")
 col.bars<-rep("", length((levels(as.factor(rca_t\$t_subc)))))
 for(i in 1:length(levels(as.factor(rca_t\$t_subc)))){
