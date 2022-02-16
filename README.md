@@ -5,7 +5,7 @@ I recommend to use this tools to replace the graphs automatically produced by th
 
 - [`dnaPT_charts.sh`](#dnapt_chartssh): plots the relative repeat proportions (2 piecharts) and the quantification of each assembled repeat (barplot).
 - [`dnaPT_landscapes.sh`](#dnapt_landscapessh): plots an histogram representing the blastn divergence mesured between each read and the assembled repeats.
-- `dnaPT_compare.sh`: perform a comparative analysis of the relative abundance of shared repeat families between two datasets.
+- [`dnaPT_compare.sh`](#dnapt_comparesh): perform a comparative analysis of the relative abundance of shared repeat families between two datasets.
 
 ## dnaPT_charts.sh
 
@@ -42,9 +42,10 @@ options:
 
 This script perform at "TE landscape" analysis, i.e., it plots an histogram of the blastn divergence between raw reads (TE copies in the genomes) and their consensus sequences assembled in the file `Trinity.fasta`. The script plots only putative TE sequences among the subclasses "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown" (a.k.a. "NA"). 
 
+![landscapes](./figures/landscapes.png)
+
 ### Dependencies:
 - R + packages `ggplot2` and `tidyr`
-
 
 ### Usage: 
 
@@ -62,7 +63,6 @@ options:
  -U, --no-unknown             Remove unclassified repeats
  -h, --help                   Prints this message and exit
 ```
-![landscapes](./figures/landscapes.png)
 
 ## dnaPT_compare.sh
 
@@ -74,8 +74,9 @@ This script measures the relative abundance of shared TE families between two da
    
 3 - The abundances of each shared family, either in % genome or equivalent copy, are then plotted with R/ggplot2.
 
+![compare](./figures/compare.png)
 >*I recommend to use caution while interpreting results with low quantities, typically < 0.01% or < 1 equivalent copy. Thresholds options are available (-p / -e) to filter the plotted data.*
-   
+
 ### Dependencies:
 
 - CD-HIT (https://github.com/weizhongli/cdhit)
