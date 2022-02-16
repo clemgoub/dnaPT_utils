@@ -3,8 +3,8 @@
 dnaPT_utils is a collection of scripts to perform multiple downstream analyses with [dnaPipeTE 1.3](https://github.com/clemgoub/dnaPipeTE)
 I recommend to use this tools to replace the graphs automatically produced by the pipeline.
 
-- `dnaPT_charts.sh`: plots the relative repeats' proportions (2 piecharts) and the quantification of each assembled repeat (barplot).
-- `dnaPT_landscapes.sh`: plots an histogram representing the blastn divergence mesured between each read and the assembled repeats.
+- [`dnaPT_charts.sh`](#dnapt_chartssh): plots the relative repeats' proportions (2 piecharts) and the quantification of each assembled repeat (barplot).
+- [`dnaPT_landscapes.sh`](#dnapt_landscapessh): plots an histogram representing the blastn divergence mesured between each read and the assembled repeats.
 - `dnaPT_compare.sh`: perform a comparative analysis of the relative abundance of shared repeat families between two datasets.
 
 ## dnaPT_charts.sh
