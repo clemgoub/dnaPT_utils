@@ -21,7 +21,7 @@ function usage()
 
    This script perform at "TE landscape" analysis, i.e., it plots an histogram of the blastn divergence between raw reads (TE
    copies in the genomes) and their consensus sequences assembled in "Trinity.fasta". The script plots only putative TE seque
-   -nce among the subclasses "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown" (a.k.a. "NA"). 
+   -nces among the subclasses "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown" (a.k.a. "NA"). 
 
    Dependencies:
    - R + package "ggplot2" and "tidyr" (https://www.r-bloggers.com/2010/11/installing-r-packages/)
