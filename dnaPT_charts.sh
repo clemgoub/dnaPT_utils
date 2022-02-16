@@ -314,6 +314,7 @@ charts<-plot_grid(top, barplot, ncol = 1)
 save_plot(
   file = paste("$PREF", "_charts.pdf", sep = ""),
   charts,
+  path = "$OUTF",
   base_width = 10,
   base_height = 8
   )
