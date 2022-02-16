@@ -313,7 +313,7 @@ charts<-plot_grid(top, barplot, ncol = 1)
 
 save_plot(
   file = paste("$PREF", "_charts.pdf", sep = ""),
-  chart,
+  charts,
   base_width = 10,
   base_height = 8
   )
