@@ -220,6 +220,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 ################################################################################
 # MAIN                                                                         #
 ################################################################################
+ymax<-"$YMAX"
 rca<-read.table("$DSA/reads_per_component_and_annotation", fill = T, na.strings=c("","NA"))
 rca<-separate(rca, V6, c("subclass", "superfamily"), sep = "/",fill = "right") 
 rca\$superfamily[is.na(rca\$superfamily)]<-"Unknown"
@@ -260,6 +261,7 @@ barplot<-ggplot(rca_t)+
   scale_fill_manual(values = col.bars, name = "repeat type")+
   xlab("cumulative genome %")+
   ylab("genome %")+
+  {if(ymax != FALSE)ylim(0,as.numeric(ymax))}+
   theme(axis.line = element_line(colour = "black"),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
@@ -320,3 +322,5 @@ save_plot(
   )
 
 SCRIPT
+
+echo "All done, results in $OUTF/"
