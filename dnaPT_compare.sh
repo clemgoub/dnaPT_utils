@@ -2,6 +2,7 @@
 #
 # Changelog
 # V.0 | 02.04.22 - first version
+# V.0.1 | 02.24.22 - fix for application with older Trinity version
 #
 # Author: Clément Goubert - goubert.clement@gmail.com
 
@@ -256,7 +257,6 @@ if [ -s $OUTF/$PREFA''_$PREFB''.clean.clstr ]
 
    # clean up cd-hit outputs before joining conts for each species
    sort -k1,1n $OUTF/$PREFA''_$PREFB.bak.clstr | sed 's/>//g;s/nt,//g;s/\.\.\.//g;s/\*/REP/g;s/at//g' | awk '/REP/ {print $1"\t"$2"\t"$3"\t"$4} !/REP/ {print $1"\t"$2"\t"$3"\tin_cluster"}'> $OUTF/$PREFA''_$PREFB''.clean.clstr
-
 
    # gather total bp sampled per species
    AC=$(grep 'Total' "$DSA"/Counts.txt | tail -n 1 | cut -f 2)
