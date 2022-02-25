@@ -53,6 +53,7 @@ function usage()
     -o, --output                 output folder (path)
 
    options:
+    -C, --cpus                   Number of threads to use with cd-hit-est (default 1)
     -T, --te_only                Only plot repeats of the sub-classes "LINE", "SINE", "LTR", "DNA", "RC" and "Unknown"
     -S, --superfamily            Plot with superfamily information (instead of Class)
     -p, --percent_threshold      min. percent genome to plot (default = 0) / not used if -E/-ecp selected
@@ -144,12 +145,12 @@ while (( "$#" )); do
          shift 2
        fi
        ;;
-#     -F | --full-length-alpha)
-#       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-#         FULL_ALPHA=$2
-#         shift 2
-#       fi
-#       ;;   
+    -C | --cpus)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        CPUS=$2
+        shift 2
+      fi
+      ;;   
 #     -y | --auto-y)
 #       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
 #         AUTO_Y=$2
@@ -213,6 +214,7 @@ TPERC="${TPERC:-0}"
 TECP="${TECP:-0}"
 TE="${TE:-FALSE}"
 SF="${SF:-FALSE}"
+CPUS="${CPUS:-1}"
 
 # param check
 echo "dataset A:          $DSA"
@@ -253,7 +255,7 @@ if [ -s $OUTF/$PREFA''_$PREFB''.clean.clstr ]
    fi
 
    # cluster sequences using CD-HIT-EST
-   cd-hit-est -i $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta -o $OUTF/$PREFA''_$PREFB -d 0 -aS 0.8 -c 0.8 -G 0 -g 1 -b 500 -bak 1 -T 8
+   cd-hit-est -i $OUTF/$PREFA''_$PREFB''_dnaPipeTE_contigs.fasta -o $OUTF/$PREFA''_$PREFB -d 0 -aS 0.8 -c 0.8 -G 0 -g 1 -b 500 -bak 1 -T $CPUS
 
    # clean up cd-hit outputs before joining conts for each species
    sort -k1,1n $OUTF/$PREFA''_$PREFB.bak.clstr | sed 's/>//g;s/nt,//g;s/\.\.\.//g;s/\*/REP/g;s/at//g' | awk '/REP/ {print $1"\t"$2"\t"$3"\t"$4} !/REP/ {print $1"\t"$2"\t"$3"\tin_cluster"}'> $OUTF/$PREFA''_$PREFB''.clean.clstr
