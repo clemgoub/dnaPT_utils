@@ -356,7 +356,7 @@ names(ecps)<-c("ecp_1", "ecp_2")
 counts<-cbind(counts, ecps)
 
 print("exporting unfiltered table...")
-write.table(counts, file="$OUTF/comparison_table.txt", quote = F, row.names = F)
+write.table(counts, file=paste("$OUTF/", "$PREFA", "_", "$PREFB", "_comparison_table.txt", sep = ""), quote = F, row.names = F)
 
 
 # Plot!
