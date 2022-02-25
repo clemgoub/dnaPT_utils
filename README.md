@@ -104,3 +104,11 @@ options:
  -h, --help                   Prints this message and exit
 ```
 > *Caution: the length used for normalization in "equivalent copy" mode (`-E/--ecp`) is based on the length of the representative sequence of each cluster, which originate from either one of the two dataset compared. It is thus assumed that the consensus length is the same in each species/sample, which is not necessarily true.*
+
+### Output files
+In addition to the graphs exported in pdf, this script also produce the following files that may be useful for the user (other files are intermediates). A and B will be replaced by the dataset prefix:
+- `A_B`: fasta file with only the representative sequences of each cluster (produced by `cd-hit-est`)
+- `A_B.clstr` and `A_B.bak.clstr`: clustering output of `cd-hit-est` (first is the main output, the second is a table version of it)
+- `A_B_comparison_table.txt`: processed data table used for plotting in R, unfiltered (i.e. is produced before applying the filtering options `-T`, `-p` or `-e`). The two first columns, named A and B according to the datasets prefixes, report the % genome of each shared repeats. The two last columns, ecp_1 and ecp_2, report the "equivalent copy" for A and B respectively.
+- `A_B_R.tsv`: raw data table (used as input for the R code)
+- `A_B_dnaPipeTE_contigs.fasta`: concatenated `Trinity.fasta` files from each dataset, with dataset prefix added. Input for `cd-hit-est`.
