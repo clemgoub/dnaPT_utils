@@ -228,17 +228,23 @@ land<-read.table(sep = "\t", text=system("join -a1 -12 -21 -o 1.3,2.4,2.5  $DSA/
 reads.c<-as.numeric(system("grep -c '>' $DSA/renamed.blasting_reads.fasta", intern = T))
 # split between subclass and superfamily
 land<-separate(land, V3, c("Sub_class", "SF"), sep = "/",fill = "right") 
+#print(land)
 names(land)<-c("div", "TE_family", "TE_subclass", "TE_SF", "TE_superfamily")
+#print(head(land))
 # remove Unknown if asked
 # print(paste("print unknown is set to ", unk, sep = ""))
 if(unk == FALSE){land<-land[!land\$TE_subclass == "Unknown",]}
 # pick the colors
 cols<-read.table("$DIR/colors.land", sep = "\t")
-
+#print(head(cols))
+#print(length((levels(as.factor(land\$TE_subclass)))))
+#print(paste("^", levels(as.factor(land\$TE_subclass))))
 if(sf_choice == TRUE){
    col.lands<-rep("", length((levels(as.factor(land\$TE_superfamily)))))
    for(i in 1:length(levels(as.factor(land\$TE_superfamily)))){
-      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
+      #col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
+      print(paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""))
+      print(cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)])
    }
    # plot
    lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
@@ -270,6 +276,7 @@ if(sf_choice == TRUE){
    col.lands<-rep("", length((levels(as.factor(land\$TE_subclass)))))
    for(i in 1:length(levels(as.factor(land\$TE_subclass)))){
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)]
+      #print(cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)])
    }
    # plot
    lscapes<-ggplot(land, aes(100-div, fill = TE_subclass))+
