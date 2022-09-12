@@ -221,7 +221,8 @@ invisible(lapply(packages, library, character.only = TRUE))
 # MAIN                                                                         #
 ################################################################################
 ymax<-"$YMAX"
-rca<-read.table("$DSA/reads_per_component_and_annotation", fill = T, na.strings=c("","NA"))
+rca<-read.table(text=system("sort -k6,6r $DSA/reads_per_component_and_annotation", intern = T), fill = T, na.strings=c("","NA"))
+print(head(rca))
 rca<-separate(rca, V6, c("subclass", "superfamily"), sep = "/",fill = "right") 
 rca\$superfamily[is.na(rca\$superfamily)]<-"Unknown"
 rca\$subclass[is.na(rca\$subclass)]<-"Unknown"
