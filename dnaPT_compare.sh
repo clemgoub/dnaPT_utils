@@ -3,7 +3,7 @@
 # Changelog
 # V.0 | 02.04.22 - first version
 # V.0.1 | 02.24.22 - fix for application with older Trinity version
-#
+# V.0.2 | 09.22.22 - bug fix: numbers are no longer treated as factors in count table
 # Author: Clément Goubert - goubert.clement@gmail.com
 
 ###################################################################################
@@ -18,7 +18,8 @@ function usage()
    >>>        dnaPT_compare.sh        <<<
    **************************************
    Author: Clément Goubert - goubert.clement@gmail.com
-   Last revision: 02/08/2022
+   Contributor: T. Mason Linscott
+   Last revision: 09/22/2022
 
    This script measures the relative abundance of shared TE families between two datasets analyzed with dnaPipeTE. 
    
@@ -359,6 +360,7 @@ counts<-cbind(counts, ecps)
 
 print("exporting unfiltered table...")
 write.table(counts, file=paste("$OUTF/", "$PREFA", "_", "$PREFB", "_comparison_table.txt", sep = ""), quote = F, row.names = F)
+counts<-read.table(file=paste("$OUTF/", "$PREFA", "_", "$PREFB", "_comparison_table.txt", sep = ""), header=TRUE)
 
 
 # Plot!
