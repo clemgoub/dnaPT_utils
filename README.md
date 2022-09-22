@@ -7,6 +7,9 @@ I recommend to use this tools to replace the graphs automatically produced by th
 - [`dnaPT_landscapes.sh`](#dnapt_landscapessh): plots an histogram representing the blastn divergence mesured between each read and the assembled repeats.
 - [`dnaPT_compare.sh`](#dnapt_comparesh): perform a comparative analysis of the relative abundance of shared repeat families between two datasets.
 
+Contributors:
+- T. Mason Linscott
+
 ## dnaPT_charts.sh
 
 This script processes an output folder of dnaPipeTE v1.3 and produces 3 graphs:
