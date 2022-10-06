@@ -47,7 +47,7 @@ HEREDOC
 # if no parameter given, output help and qui
 if [[ $# -eq 0 ]] ; then
     echo '   **********************************'
-    echo '   Error! No mendatory argument given'
+    echo '   Error! No mandatory argument given'
     echo '   **********************************'
     usage
     exit 0
@@ -242,9 +242,9 @@ cols<-read.table("$DIR/colors.land", sep = "\t")
 if(sf_choice == TRUE){
    col.lands<-rep("", length((levels(as.factor(land\$TE_superfamily)))))
    for(i in 1:length(levels(as.factor(land\$TE_superfamily)))){
-      #col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
-      print(paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""))
-      print(cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)])
+      col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
+      #print(paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""))
+      #print(cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)])
    }
    # plot
    lscapes<-ggplot(land, aes(100-div, fill = TE_superfamily))+
