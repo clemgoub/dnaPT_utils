@@ -115,3 +115,56 @@ In addition to the graphs exported in pdf, this script also produce the followin
 - `A_B_comparison_table.txt`: processed data table used for plotting in R, unfiltered (i.e. is produced before applying the filtering options `-T`, `-p` or `-e`). The two first columns, named A and B according to the datasets prefixes, report the % genome of each shared repeats. The two last columns, ecp_1 and ecp_2, report the "equivalent copy" for A and B respectively.
 - `A_B_R.tsv`: raw data table (used as input for the R code)
 - `A_B_dnaPipeTE_contigs.fasta`: concatenated `Trinity.fasta` files from each dataset, with dataset prefix added. Input for `cd-hit-est`.
+
+### Known issues:
+
+- A common source of error is if one of more annotations are missing in the file `colors.land`:
+
+This error causes the scripts `dnaPT_charts.sh` and `dnaPT_landscape.sh <with -S option>` to fail with the error: 
+
+```
+Error in col.bars[i] <- cols$V2[grep(pattern = paste("^", levels(as.factor(rca_t$t_subc))[i],  :
+  replacement has length zero
+Execution halted
+```
+> See also issue #4
+
+The solution is to add the missing annotation to `colors.land`. The file is present alongside the `dnaPT_utils` scripts and look like so (extract):
+```
+DNA/TcMar-Tigger    "#FF936C"
+DNA/TcMar-Tigger?   "#FF936C"
+DNA/Zator   "#FF9F79"
+DNA/Zator?  "#FF9F79"
+DNA/Zisupton    "#FFCCCC"
+DNA/Zisupton?   "#FFCCCC"
+LINE    "royalblue"
+LINE?   "#251792"
+LINE/Ambal  "#37B9F0"
+LINE/CR1    "#483AA2"
+LINE/CR1?   "#483AA2"
+```
+
+To add your annotation, follow this pattern:
+
+- 1 If the annotation is of the for `class/superfamily` (or similar):
+    - 1.1 add one line `class/superfamily<tab>color` **AND**
+    - 1.2 add on line with only the class: `class<tab>color`.
+- 2 If the annotation is only `class` (no `/`):
+    - 2.1 only add the line `class<tab>color`
+
+`color` needs to be in hexadecimal form with double quotes (e.g. `"#AD49F2"`) see: https://htmlcolorcodes.com/ **OR** a R color (e.g. `"royalblue"`) see: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf.
+
+To find the missing annotations, the script will output the latest annotations before the error like so:
+
+```
+[1] "Recognized classes:"
+[1] "^DNA$"
+[1] "^LINE$"
+[1] "^Low_complexity$"
+[1] "^LTR$"
+[1] "^PLE$"
+Error in col.bars[i] <- cols$V2[grep(pattern = paste("^", levels(as.factor(rca_t$t_subc))[i],  :
+  replacement has length zero
+Execution halted
+```
+> In this case, the first annotation that was missing was `PLE` (it is now supported)

@@ -241,7 +241,9 @@ cols<-read.table("$DIR/colors.land", sep = "\t")
 #print(paste("^", levels(as.factor(land\$TE_subclass))))
 if(sf_choice == TRUE){
    col.lands<-rep("", length((levels(as.factor(land\$TE_superfamily)))))
+   print("Recognized classes:")
    for(i in 1:length(levels(as.factor(land\$TE_superfamily)))){
+      print(paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""))
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)]
       #print(paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""))
       #print(cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""), x = cols\$V1)])
@@ -274,7 +276,9 @@ if(sf_choice == TRUE){
 } else {
 
    col.lands<-rep("", length((levels(as.factor(land\$TE_subclass)))))
+   print("Recognized classes:")
    for(i in 1:length(levels(as.factor(land\$TE_subclass)))){
+      print(paste("^", levels(as.factor(land\$TE_superfamily))[i], "$", sep = ""))
       col.lands[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)]
       #print(cols\$V2[grep(pattern = paste("^", levels(as.factor(land\$TE_subclass))[i], "$", sep = ""), x = cols\$V1)])
    }

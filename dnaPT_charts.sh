@@ -222,7 +222,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 ################################################################################
 ymax<-"$YMAX"
 rca<-read.table(text=system("sort -k6,6r $DSA/reads_per_component_and_annotation", intern = T), fill = T, na.strings=c("","NA"))
-print(head(rca))
+#print(head(rca))
 rca<-separate(rca, V6, c("subclass", "superfamily"), sep = "/",fill = "right") 
 rca\$superfamily[is.na(rca\$superfamily)]<-"Unknown"
 rca\$subclass[is.na(rca\$subclass)]<-"Unknown"
@@ -253,7 +253,9 @@ rca_t\$x1<-as.numeric(rca_t\$x2)-as.numeric(rca_t\$perc_g)
 cols<-read.table("$DIR/colors.land", sep = "\t")
 cols[length(cols\$V1)+1,]<-c(paste("repeats_under_", threshold, "%", sep = ""), "grey10")
 col.bars<-rep("", length((levels(as.factor(rca_t\$t_subc)))))
+print("Recognized classes:")
 for(i in 1:length(levels(as.factor(rca_t\$t_subc)))){
+  print(paste("^", levels(as.factor(rca_t\$t_subc))[i], "$", sep = ""))
   col.bars[i]<-cols\$V2[grep(pattern = paste("^", levels(as.factor(rca_t\$t_subc))[i], "$", sep = ""), x = cols\$V1)]
 }
 
